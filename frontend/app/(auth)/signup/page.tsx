@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
 import Link from "next/link";
-import { useToggleVisibility } from "../Hooks";
-import { authSchema, FormData } from "../schemas/authSchema";
+import { useToggleVisibility } from "@/app/Hooks";
+import { authSchema, FormData } from "@/app/schemas/authSchema";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function Login() {
+export default function Signup() {
 	const {
 		register,
 		reset,
@@ -20,44 +21,57 @@ export default function Login() {
 	} = useForm({ resolver: zodResolver(authSchema) });
 	const router = useRouter();
 
+	const [registrationError, setRegistrationError] = useState("");
+
 	const { toggleVisibility, handleToggleVisibility } = useToggleVisibility();
 
 	const onSubmit = async (data: FormData) => {
 		try {
-			const res = await fetch("http://localhost:3222/login", {
+			const res = await fetch("http://localhost:3222/signup", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(data),
 			});
 
+			const resData = await res.json();
 			if (!res.ok) {
-				const errorData = await res.json();
 				if (res.status === 400) {
-					console.log(errorData.message);
-					return;
+					const error = resData.error;
+					setRegistrationError(error);
 				} else if (res.status === 409) {
-					console.log(errorData.message);
-					router.push("/signup");
-					return;
+					const error = resData.error;
+					setRegistrationError(error);
+					setTimeout(() => {
+						router.push("/login");
+						reset();
+					}, 1000);
+				} else {
+					setRegistrationError(resData.error || "Something went wrong");
 				}
 				return;
 			}
-			const authData = await res.json();
-			localStorage.setItem("user", JSON.stringify(authData.user));
-			console.log(authData.message);
 			reset();
-			router.push("/");
+			router.push("/login");
 		} catch (err) {
-			console.error("Isse authenticating user", err);
+			console.error("Issue registering user:", err);
+			setRegistrationError("Something went wrong. Please try again.");
 		}
 	};
 
 	return (
 		<main className="flex items-center justify-center h-screen bg-gray-50 px-4">
-			<section className="w-full max-w-md bg-white shadow-md rounded-2xl p-8">
+			<section className="w-full max-w-md bg-white shadow-md rounded-2xl p-8 flex flex-col">
+				{registrationError && (
+					<div className="flex justify-between items-center gap-2 px-3 py-2 mb-4 bg-red-100 text-red-700 text-sm font-medium rounded-md border border-red-200 shadow-sm">
+						{registrationError}
+						<button type="button" onClick={() => setRegistrationError("")} className="text-red-700">
+							<X size={20} />
+						</button>
+					</div>
+				)}
 				<div className="text-center">
-					<h1 className="text-2xl font-semibold text-gray-900 mb-2">Log in</h1>
-					<p className="text-sm text-gray-500 mb-6">Log into your account</p>
+					<h1 className="text-2xl font-semibold text-gray-900 mb-2">Sign Up</h1>
+					<p className="text-sm text-gray-500 mb-6">Create an account to get started</p>
 				</div>
 
 				<form className="mb-4" onSubmit={handleSubmit(onSubmit)}>
@@ -103,22 +117,27 @@ export default function Login() {
 						)}
 					</fieldset>
 
-					<Button className="w-full" type="submit">
+					<Button
+						className="w-full disabled:opacity-50"
+						type="submit"
+						disabled={isSubmitting}
+						aria-busy={isSubmitting}
+					>
 						{isSubmitting ? (
-							<span className="">
+							<span className="flex items-center gap-2">
 								<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-								Log in...
+								Signing up...
 							</span>
 						) : (
-							"Log in"
+							"Sign up"
 						)}
 					</Button>
 				</form>
 
 				<p className="text-sm text-center text-gray-600">
-					Don't have an account?{" "}
-					<Link href="/signup" className="text-blue-600 hover:underline cursor-pointer">
-						Sign In
+					Already have an account?{" "}
+					<Link href="/login" className="text-blue-600 hover:underline cursor-pointer">
+						Log In
 					</Link>
 				</p>
 			</section>

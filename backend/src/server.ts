@@ -1,9 +1,10 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import bcrypt from "bcrypt";
-import { UserType } from "../schemas/userSchema";
 import { v4 as uuidv4 } from "uuid";
+import { SignJWT, jwtVerify } from "jose";
+import { UserType } from "../schemas/userSchema";
 import { authSchema } from "../schemas/authSchema";
 
 dotenv.config();
@@ -11,20 +12,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 let users: UserType[] = [];
 
-// Sign up
 app.post("/signup", async (req, res) => {
 	const input = req.body;
 	const parsed = authSchema.safeParse(input);
 	if (!parsed.success) {
-		return res.status(400).json({ message: "Invalid input" });
+		return res.status(400).json({ error: "Invalid input" });
 	}
 	const { email, password } = parsed.data;
 
 	const user = users.find((u) => u.email === email);
 
-	if (user) return res.status(409).json({ message: "User already exist. log in instead" });
+	if (user) return res.status(409).json({ error: "User already exist. log in instead" });
 
 	const saltRounds = 10;
 	const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -35,34 +36,37 @@ app.post("/signup", async (req, res) => {
 		todos: [],
 	};
 	users.push(newUser);
-	console.log(newUser);
-	console.log(users);
 	return res.status(200).json({ message: "User successfully registered" });
 });
 
-// Sign in
 app.post("/login", async (req, res) => {
 	const input = req.body;
 	const parsed = authSchema.safeParse(input);
 	if (!parsed.success) {
-		return res.status(400).json({ message: "Invalid input" });
+		return res.status(400).json({ error: "Invalid input" });
 	}
 	const { email, password } = parsed.data;
 	const user = users.find((u) => u.email === email);
-	console.log(user);
 
-	if (!user) return res.status(404).json({ message: "User doesn't exist. sign up instead" });
+	if (!user) return res.status(404).json({ error: "User doesn't exist. sign up instead" });
 
 	const isMatch = await bcrypt.compare(password, user.password);
-	if (!isMatch) return res.status(401).json({ message: "Wrong password" });
-	return res.status(200).json({ message: "User successfully authenticated", user: user });
+	if (!isMatch) return res.status(401).json({ error: "Wrong password" });
+
+	const token = await new SignJWT({ userId: user.id })
+		.setProtectedHeader({ alg: "HS256" })
+		.setExpirationTime("1h")
+		.sign(JWT_SECRET);
+	return res
+		.status(200)
+		.json({ message: "User successfully authenticated", token, todos: user.todos });
 });
 
-// Add todo
-app.post("/add-todo", async (req, res) => {
-	const { userId, title } = req.body;
+app.post("/add-todo", authMiddleware, async (req: Request & { userId?: string }, res: Response) => {
+	const { title } = req.body;
 	if (!title) return res.status(400).json({ message: "Missing input" });
-	const user = users.find((u) => u.id === userId);
+
+	const user = users.find((u) => u.id === req.userId);
 	if (!user) return res.status(404).json({ message: "User not found" });
 
 	const newTodo = {
@@ -73,31 +77,49 @@ app.post("/add-todo", async (req, res) => {
 	if (!user.todos) user.todos = [];
 	user.todos.push(newTodo);
 
-	return res.status(200).json({ message: "Todo saved", todo: newTodo, user: user });
+	return res.status(200).json({ message: "Todo saved", todo: newTodo });
 });
 
-// Delete todo
-app.delete("/delete-todo", async (req, res) => {
-	const { userId, todoId } = req.body;
-	if (!userId) return res.status(400).json({ message: "User Id is required" });
+app.delete(
+	"/todos/:todoId",
+	authMiddleware,
+	async (req: Request & { userId?: string }, res: Response) => {
+		const todoId = req.params.todoId;
 
-	if (!todoId) return res.status(400).json({ error: "Todo Id is required" });
+		if (!todoId.trim()) return res.status(400).json({ error: "Todo Id is required" });
 
-	const user = users.find((u) => u.id === userId);
+		const user = users.find((u) => u.id === req.userId);
+		if (!user) return res.status(404).json({ error: "User not found" });
 
-	if (!user) return res.status(400).json({ error: "User not found" });
-	const todoExist = user.todos?.some((t) => t.id === todoId);
+		const todoExist = user.todos?.some((t) => t.id === todoId);
+		if (!todoExist) {
+			return res.status(404).json({ error: "Todo not found" });
+		}
 
-	if (!todoExist) {
-		return res.status(404).json({ error: "Todo not found" });
+		user.todos = user.todos?.filter((t) => t.id !== todoId) || [];
+
+		return res.status(200).json({ message: "Todo deleted successfully", todos: user.todos });
 	}
-	const updatedUser = { ...user, todos: user?.todos?.filter((t) => t.id !== todoId) };
-	const userIndex = users.findIndex((u) => u.id === userId);
-	users[userIndex] = updatedUser;
-
-	return res.status(200).json({ message: "Todo deleted successfully", user: updatedUser });
-});
+);
 
 app.listen(3222, () => {
 	console.log("Server running at http://localhost:3222");
 });
+
+async function authMiddleware(
+	req: Request & { userId?: string },
+	res: Response,
+	next: NextFunction
+) {
+	const authHeader = req.headers.authorization;
+	if (!authHeader) return res.status(401).json({ error: "Missing token" });
+
+	const token = authHeader.split(" ")[1];
+	try {
+		const { payload } = await jwtVerify(token, JWT_SECRET);
+		req.userId = payload.userId as string;
+		next();
+	} catch (err) {
+		return res.status(401).json({ error: "Invalid or expired token" });
+	}
+}

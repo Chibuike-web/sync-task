@@ -1,93 +1,97 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { UserType } from "./schemas/userSchema";
+import { useAuthGuard } from "./Hooks";
 import { TodoType } from "./schemas/todoSchema";
 
 export default function Home() {
 	const [input, setInput] = useState("");
-	const [user, setUser] = useState<UserType | null>(null);
-
+	const [todos, setTodos] = useState<TodoType[]>([]);
 	const router = useRouter();
 
-	useEffect(() => {
-		const storedUser = localStorage.getItem("user");
-		if (!storedUser) {
-			router.push("/signup");
-			return;
-		}
-		const parsedUser = JSON.parse(storedUser);
-		if (!parsedUser) return;
+	useAuthGuard();
 
-		setUser(parsedUser);
+	useEffect(() => {
+		const stored = localStorage.getItem("todos");
+		if (stored) {
+			try {
+				setTodos(JSON.parse(stored));
+			} catch {
+				console.error("Invalid todos in localStorage");
+			}
+		}
 	}, []);
 
-	useLayoutEffect(() => {
-		if (user) localStorage.setItem("user", JSON.stringify(user));
-	}, [user]);
+	useEffect(() => {
+		localStorage.setItem("todos", JSON.stringify(todos));
+	}, [todos]);
 
 	const handleAddTodo = async () => {
-		if (!user || !input.trim()) return;
-
-		const newTodo: TodoType = {
-			id: crypto.randomUUID(),
-			title: input.trim(),
-		};
+		if (!input.trim()) return;
 
 		try {
-			const res = await fetch("http://localhost:3222/add-todo", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ userId: user.id, title: input.trim() }),
-			});
-			if (!res.ok) {
-				const errorData = await res.json();
-				if (res.status === 400) {
-					console.log(errorData.message);
-					return;
-				} else if (res.status === 404) {
-					console.log(errorData.message);
-					return;
-				}
+			const token = localStorage.getItem("token");
+			if (!token) {
+				router.push("/login");
 				return;
 			}
+
+			const res = await fetch("http://localhost:3222/add-todo", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({ title: input.trim() }),
+			});
+
 			const data = await res.json();
-			setUser(data.user);
+			if (!res.ok) {
+				console.error(data.error);
+				return;
+			}
+
+			const newTodo = data.todo;
+			setTodos((prev) => [...prev, newTodo]);
+
 			setInput("");
 		} catch (err) {
-			console.log(err);
-			setUser({ ...user, todos: user.todos?.filter((t) => t.id !== newTodo.id) });
+			console.error(err);
 		}
 	};
 
-	const handleDelete = async (id: string) => {
-		if (!user) return;
-		const updatedTodos = user.todos?.filter((t) => t.id !== id);
-		setUser({ ...user, todos: updatedTodos });
+	const handleDelete = async (todoId: string) => {
+		if (!todoId) return;
+
+		const prevTodos = todos;
+		setTodos((prev) => prev?.filter((t) => t.id !== todoId));
+
 		try {
-			const res = await fetch("http://localhost:3222/delete-todo", {
-				method: "DELETE",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ userId: user.id, todoId: id }),
-			});
-			if (!res.ok) {
-				const errorData = await res.json();
-				if (res.status === 400) {
-					console.log(errorData.message);
-					return;
-				} else if (res.status === 404) {
-					console.log(errorData.message);
-					return;
-				}
+			const token = localStorage.getItem("token");
+			if (!token) {
+				router.push("/login");
 				return;
 			}
+
+			const res = await fetch(`http://localhost:3222/todos/${todoId}`, {
+				method: "DELETE",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
 			const data = await res.json();
-			setUser(data.user);
+			if (!res.ok) {
+				console.error(data.error);
+				setTodos(prevTodos);
+			}
 		} catch (err) {
 			console.error(err);
+			setTodos(prevTodos);
 		}
 	};
 
@@ -107,18 +111,17 @@ export default function Home() {
 				</div>
 
 				<ul className="flex flex-col gap-4 divide-y-1">
-					{user?.todos &&
-						user?.todos.map((todo) => (
-							<li key={todo.id} className="flex items-center justify-between pb-4">
-								<span>{todo.title}</span>
-								<div className="flex gap-2">
-									<Button variant="outline">Edit</Button>
-									<Button variant="destructive" onClick={() => handleDelete(todo.id)}>
-										Delete
-									</Button>
-								</div>
-							</li>
-						))}
+					{todos?.map((todo) => (
+						<li key={todo.id} className="flex items-center justify-between pb-4">
+							<span>{todo.title}</span>
+							<div className="flex gap-2">
+								<Button variant="outline">Edit</Button>
+								<Button variant="destructive" onClick={() => handleDelete(todo.id)}>
+									Delete
+								</Button>
+							</div>
+						</li>
+					))}
 				</ul>
 			</section>
 		</main>
