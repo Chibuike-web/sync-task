@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -10,7 +10,10 @@ import { TodoType } from "./schemas/todoSchema";
 export default function Home() {
 	const [input, setInput] = useState("");
 	const [todos, setTodos] = useState<TodoType[]>([]);
+	const [editId, setEditId] = useState("");
+	const [editContent, setEditContent] = useState("");
 	const router = useRouter();
+	const inputRef = useRef<HTMLInputElement>(null);
 
 	useAuthGuard();
 
@@ -95,6 +98,20 @@ export default function Home() {
 		}
 	};
 
+	const handleSave = async (todoId: string) => {
+		console.log("Man");
+		if (!editContent.trim()) return;
+		console.log("Women");
+		setTodos((prev) => prev.map((t) => (t.id === todoId ? { ...t, title: editContent } : t)));
+		setEditId("");
+	};
+
+	useEffect(() => {
+		if (editId && inputRef.current) {
+			inputRef.current.focus();
+		}
+	}, [editId]);
+
 	return (
 		<main className="flex items-center justify-center h-screen bg-gray-50 px-4">
 			<section className="w-full max-w-md bg-white shadow-md rounded-2xl p-8">
@@ -112,15 +129,42 @@ export default function Home() {
 
 				<ul className="flex flex-col gap-4 divide-y-1">
 					{todos?.map((todo) => (
-						<li key={todo.id} className="flex items-center justify-between pb-4">
-							<span>{todo.title}</span>
-							<div className="flex gap-2">
-								<Button variant="outline">Edit</Button>
-								<Button variant="destructive" onClick={() => handleDelete(todo.id)}>
-									Delete
-								</Button>
-							</div>
-						</li>
+						<Fragment key={todo.id}>
+							{editId === todo.id ? (
+								<div className="flex items-center gap-2 pb-4">
+									<Input
+										type="text"
+										ref={inputRef}
+										value={editContent}
+										onChange={(e) => setEditContent(e.target.value)}
+									/>
+									<Button type="button" onClick={() => handleSave(todo.id)}>
+										Save
+									</Button>
+									<Button type="button" variant="outline" onClick={() => setEditId("")}>
+										Cancel
+									</Button>
+								</div>
+							) : (
+								<li key={todo.id} className="flex items-center justify-between pb-4">
+									<span>{todo.title}</span>
+									<div className="flex gap-2">
+										<Button
+											variant="outline"
+											onClick={() => {
+												setEditId(todo.id);
+												setEditContent(todo.title);
+											}}
+										>
+											Edit
+										</Button>
+										<Button variant="destructive" onClick={() => handleDelete(todo.id)}>
+											Delete
+										</Button>
+									</div>
+								</li>
+							)}
+						</Fragment>
 					))}
 				</ul>
 			</section>
