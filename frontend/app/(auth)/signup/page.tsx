@@ -61,6 +61,10 @@ export default function Signup() {
 	return (
 		<main className="flex items-center justify-center h-screen bg-gray-50 px-4">
 			<section className="w-full max-w-md bg-white shadow-md rounded-2xl p-8 flex flex-col">
+				<div className="text-center">
+					<h1 className="text-2xl font-semibold text-gray-900 mb-2">Sign Up</h1>
+					<p className="text-sm text-gray-500 mb-6">Create an account to get started</p>
+				</div>
 				{registrationError && (
 					<div className="flex justify-between items-center gap-2 px-3 py-2 mb-4 bg-red-100 text-red-700 text-sm font-medium rounded-md border border-red-200 shadow-sm">
 						{registrationError}
@@ -69,11 +73,6 @@ export default function Signup() {
 						</button>
 					</div>
 				)}
-				<div className="text-center">
-					<h1 className="text-2xl font-semibold text-gray-900 mb-2">Sign Up</h1>
-					<p className="text-sm text-gray-500 mb-6">Create an account to get started</p>
-				</div>
-
 				<form className="mb-4" onSubmit={handleSubmit(onSubmit)}>
 					<fieldset className="mb-4">
 						<Label htmlFor="email" className="mb-2">

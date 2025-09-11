@@ -62,7 +62,7 @@ app.post("/login", async (req, res) => {
 		.json({ message: "User successfully authenticated", token, todos: user.todos });
 });
 
-app.post("/add-todo", authMiddleware, async (req: Request & { userId?: string }, res: Response) => {
+app.post("/todos", authMiddleware, async (req: Request & { userId?: string }, res: Response) => {
 	const { title } = req.body;
 	if (!title) return res.status(400).json({ message: "Missing input" });
 

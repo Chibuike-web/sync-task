@@ -48,6 +48,7 @@ export default function Login() {
 			router.push("/");
 		} catch (err) {
 			console.error("Issue authenticating user", err);
+			setLoginError("Something went wrong. Please try again.");
 		}
 	};
 

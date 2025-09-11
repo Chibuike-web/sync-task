@@ -42,7 +42,7 @@ export default function Home() {
 				return;
 			}
 
-			const res = await fetch("http://localhost:3222/add-todo", {
+			const res = await fetch("http://localhost:3222/todos", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
