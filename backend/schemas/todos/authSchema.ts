@@ -13,4 +13,4 @@ export const authSchema = z.object({
 		.min(6, "Password must contain at least 6 character"),
 });
 
-export type FormData = z.infer<typeof authSchema>;
+export type UserType = z.infer<typeof authSchema>;

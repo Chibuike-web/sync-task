@@ -1,10 +1,10 @@
 "use client";
 
-import { Bell, EllipsisVertical, Plus, Search } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { initialTasks, Task } from "./lib/data";
+import { useEffect } from "react";
+import { initialTasks, Task } from "../lib/data";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -21,7 +21,7 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { AlertDialogAction, AlertDialogCancel } from "@radix-ui/react-alert-dialog";
-import { useTaskStore } from "./store/taskStore";
+import { useTaskStore } from "../store/taskStore";
 
 export default function TasksClient() {
 	const { tasks, setTasks } = useTaskStore();
@@ -37,49 +37,28 @@ export default function TasksClient() {
 		}
 	}, []);
 	return (
-		<div>
-			<header className="py-6 border-b border-sidebar-border">
-				<nav className="flex items-center justify-between max-w-[700px] mx-auto">
-					<h1 className="tracking-[-0.05em] text-[20px] font-bold">SyncTask</h1>
-					<div className="flex gap-6 items-center">
-						<Button className="text-[16px]" size="lg">
-							<Plus className="w-5 h-5" />
-							<span>Create Task</span>
-						</Button>
-						<div className="flex items-center gap-2">
-							<button className="p-2" type="button">
-								<Bell />
-							</button>
-							<button className="p-2" type="button">
-								<Search />
-							</button>
-						</div>
-					</div>
-				</nav>
-			</header>
-			<main className="flex items-center justify-between max-w-[700px] mx-auto mt-10">
-				<Tabs defaultValue="all" className="w-full">
-					<TabsList className="w-max">
-						<TabsTrigger value="all">All</TabsTrigger>
-						<TabsTrigger value="not started">Not Started</TabsTrigger>
-						<TabsTrigger value="started">Started</TabsTrigger>
-						<TabsTrigger value="completed">Completed</TabsTrigger>
-					</TabsList>
-					<TabsContent value="all">
-						<AllTasks />
-					</TabsContent>
-					<TabsContent value="started">
-						<StartedTasks />
-					</TabsContent>
-					<TabsContent value="not started">
-						<NotStartedTasks />
-					</TabsContent>
-					<TabsContent value="completed">
-						<CompletedTasks />
-					</TabsContent>
-				</Tabs>
-			</main>
-		</div>
+		<main className="flex items-center justify-between max-w-[700px] mx-auto mt-10">
+			<Tabs defaultValue="all" className="w-full">
+				<TabsList className="w-max">
+					<TabsTrigger value="all">All</TabsTrigger>
+					<TabsTrigger value="not started">Not Started</TabsTrigger>
+					<TabsTrigger value="started">Started</TabsTrigger>
+					<TabsTrigger value="completed">Completed</TabsTrigger>
+				</TabsList>
+				<TabsContent value="all">
+					<AllTasks />
+				</TabsContent>
+				<TabsContent value="started">
+					<StartedTasks />
+				</TabsContent>
+				<TabsContent value="not started">
+					<NotStartedTasks />
+				</TabsContent>
+				<TabsContent value="completed">
+					<CompletedTasks />
+				</TabsContent>
+			</Tabs>
+		</main>
 	);
 }
 
