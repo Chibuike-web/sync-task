@@ -6,7 +6,17 @@ type TaskStoreType = {
 	setTasks: (value: Task[]) => void;
 };
 
-export const useTaskStore = create<TaskStoreType>((set) => ({
+const taskStore = create<TaskStoreType>((set) => ({
 	tasks: [],
 	setTasks: (value: Task[]) => set({ tasks: value }),
 }));
+
+export const useTaskStore = () => {
+	const tasks = taskStore((s) => s.tasks);
+	const setTasks = taskStore((s) => s.setTasks);
+
+	return {
+		tasks,
+		setTasks,
+	};
+};

@@ -5,3 +5,7 @@ export const users = sqliteTable("users", {
 	email: text("email").notNull().unique(),
 	password: text("password").notNull(),
 });
+
+export const todos = sqliteTable("todos", {
+
+})
