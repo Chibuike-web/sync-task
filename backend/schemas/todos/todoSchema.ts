@@ -1,13 +1,15 @@
 import { z } from "zod";
 
-export const singleTodoSchema = z.object({
-	id: z.uuid(),
-	title: z.string(),
-});
+export const singleTodoSchema = z.object();
 
-export const todoGroupSchema = z.object({
+export const todoSchema = z.object({
 	userId: z.uuid(),
-	todos: z.array(singleTodoSchema),
+	todos: z.array(
+		z.object({
+			id: z.uuid(),
+			title: z.string(),
+		})
+	),
 });
 
-export type TodoGroup = z.infer<typeof todoGroupSchema>;
+export type Todo = z.infer<typeof todoSchema>;

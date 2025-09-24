@@ -42,7 +42,7 @@ export default function SignupClient() {
 					const error = resData.error;
 					setRegistrationError(error);
 					setTimeout(() => {
-						router.push("/login");
+						router.push("/todos/login");
 						reset();
 					}, 1000);
 				} else {

@@ -4,8 +4,8 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useAuthGuard } from "@/lib/hooks/useToggleVisibility";
 import { TodoType } from "@/lib/schemas/todoSchema";
+import { useAuthGuard } from "./hooks/useAuth";
 
 export default function Home() {
 	const [input, setInput] = useState("");
@@ -15,7 +15,7 @@ export default function Home() {
 	const router = useRouter();
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	useAuthGuard();
+	const ready = useAuthGuard();
 
 	useEffect(() => {
 		const stored = localStorage.getItem("todos");
@@ -111,6 +111,8 @@ export default function Home() {
 			inputRef.current.focus();
 		}
 	}, [editId]);
+
+	if (!ready) return null;
 
 	return (
 		<main className="flex items-center justify-center h-screen bg-gray-50 px-4">
