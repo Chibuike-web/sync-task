@@ -79,8 +79,14 @@ export default function SignupClient() {
 						{...register("email")}
 						className="text-[14px] placeholder:text-[14px]"
 						placeholder="you@example.com"
+						aria-describedby={errors.email ? "email-error" : undefined}
+						aria-invalid={errors.email ? true : false}
 					/>
-					{errors.email && <p className="text-red-500 text-[14px] mt-1">{errors.email.message}</p>}
+					{errors.email && (
+						<p id="email-error" className="text-red-500 text-[14px] mt-1">
+							{errors.email.message}
+						</p>
+					)}
 				</fieldset>
 
 				<fieldset className="mb-8 relative">
@@ -94,6 +100,8 @@ export default function SignupClient() {
 							{...register("password")}
 							className="text-[14px] placeholder:text-[14px]"
 							placeholder="Enter your password"
+							aria-describedby={errors.password ? "password-error" : undefined}
+							aria-invalid={errors.password ? true : false}
 						/>
 						<button
 							onClick={handleToggleVisibility}
@@ -105,7 +113,9 @@ export default function SignupClient() {
 					</div>
 
 					{errors.password && (
-						<p className="text-red-500 text-[14px] mt-1">{errors.password.message}</p>
+						<p id="password-error" className="text-red-500 text-[14px] mt-1">
+							{errors.password.message}
+						</p>
 					)}
 				</fieldset>
 

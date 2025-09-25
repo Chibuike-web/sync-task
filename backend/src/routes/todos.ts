@@ -3,7 +3,7 @@ import { JWT_SECRET } from "../config";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { SignJWT, jwtVerify } from "jose";
-import { authSchema, type UserType } from "../../schemas/todos/authSchema";
+import { authSchema } from "../../schemas/todos/authSchema";
 import { db } from "../../todos/lib/index";
 import { todos } from "../../todos/lib/schema";
 import { and, eq } from "drizzle-orm";
@@ -72,6 +72,21 @@ router.post("/login", async (req, res) => {
 	}
 });
 
+router.get("/", authMiddleware, async (req: Request & { userId?: string }, res: Response) => {
+	try {
+		const userTodos = db
+			.select()
+			.from(todos)
+			.where(eq(todos.userId, Number(req.userId)))
+			.all();
+
+		return res.status(200).json(userTodos);
+	} catch (error) {
+		console.error("Error fetching todos:", error);
+		res.status(500).json({ error: "Failed to fetch todos" });
+	}
+});
+
 router.post("/", authMiddleware, async (req: Request & { userId?: string }, res: Response) => {
 	try {
 		const { title } = req.body;
@@ -93,7 +108,9 @@ router.post("/", authMiddleware, async (req: Request & { userId?: string }, res:
 		db.insert(todos).values(newTodo).run();
 
 		return res.status(200).json({ message: "Todo saved", todo: newTodo });
-	} catch (error) {}
+	} catch (error) {
+		console.error(error);
+	}
 });
 
 router.delete(
@@ -117,6 +134,33 @@ router.delete(
 		} catch (error) {
 			console.error(error);
 			res.status(500).json({ error: "Failed to delete todo" });
+		}
+	}
+);
+
+router.put(
+	"/:todoId",
+	authMiddleware,
+	async (req: Request & { userId?: string }, res: Response) => {
+		try {
+			const todoId = req.params.todoId;
+			if (!todoId.trim()) return res.status(400).json({ error: "Todo Id is required" });
+			const { content } = req.body;
+			if (!content.trim()) return res.status(400).json({ error: "Content is required" });
+
+			const edited = await db
+				.update(todos)
+				.set({ title: content })
+				.where(and(eq(todos.userId, Number(req.userId)), eq(todos.id, todoId)))
+				.returning();
+
+			if (edited.length === 0) {
+				return res.status(404).json({ error: "Todo not found" });
+			}
+			return res.status(200).json({ message: "Todo updated", todo: edited[0] });
+		} catch (error) {
+			console.error(error);
+			return res.status(500).json({ error: "Failed to update todo" });
 		}
 	}
 );

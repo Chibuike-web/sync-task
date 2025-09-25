@@ -1,7 +1,13 @@
+import SWRProvider from "./swr-config";
+
 export default function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	return <>{children}</>;
+	return (
+		<>
+			<SWRProvider>{children}</SWRProvider>
+		</>
+	);
 }
