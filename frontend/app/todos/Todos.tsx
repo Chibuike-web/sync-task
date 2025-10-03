@@ -34,7 +34,6 @@ export default function Todos() {
 
 const TodoList = () => {
 	const [input, setInput] = useState("");
-	const [todos, setTodos] = useState<TodoType[]>([]);
 	const [editId, setEditId] = useState("");
 	const [editContent, setEditContent] = useState("");
 	const router = useRouter();

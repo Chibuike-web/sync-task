@@ -59,12 +59,9 @@ router.post("/login", async (req, res) => {
 			.setExpirationTime("1h")
 			.sign(JWT_SECRET);
 
-		const userTodos = db.select().from(todos).where(eq(todos.userId, existingUser.id)).all();
-
 		return res.status(200).json({
 			message: "User successfully authenticated",
 			token,
-			todos: userTodos || [],
 		});
 	} catch (err) {
 		console.error("Login failed:", err);
@@ -80,7 +77,7 @@ router.get("/", authMiddleware, async (req: Request & { userId?: string }, res: 
 			.where(eq(todos.userId, Number(req.userId)))
 			.all();
 
-		return res.status(200).json(userTodos);
+		return res.status(200).json(userTodos || []);
 	} catch (error) {
 		console.error("Error fetching todos:", error);
 		res.status(500).json({ error: "Failed to fetch todos" });

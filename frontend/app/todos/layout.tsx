@@ -1,4 +1,4 @@
-import SWRProvider from "./swr-config";
+import SWRProvider from "./swrConfig";
 
 export default function RootLayout({
 	children,

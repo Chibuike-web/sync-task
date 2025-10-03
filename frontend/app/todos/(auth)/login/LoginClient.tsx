@@ -42,7 +42,6 @@ export default function LoginClient() {
 				return;
 			}
 			localStorage.setItem("token", resData.token);
-			localStorage.setItem("todos", JSON.stringify(resData.todos));
 			console.log(resData.message);
 			reset();
 			router.push("/todos");

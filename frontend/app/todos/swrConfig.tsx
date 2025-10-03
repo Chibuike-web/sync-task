@@ -15,7 +15,8 @@ export default function SWRProvider({ children }: { children: React.ReactNode })
 					});
 
 					if (!res.ok) throw new Error("Failed to fetch");
-					return res.json();
+					const data = await res.json();
+					return Array.isArray(data) ? data : [];
 				},
 				suspense: true,
 				fallback: {
