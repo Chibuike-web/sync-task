@@ -36,7 +36,6 @@ const TodoList = () => {
 	const [input, setInput] = useState("");
 	const [editId, setEditId] = useState("");
 	const [editContent, setEditContent] = useState("");
-	const router = useRouter();
 
 	const { data, error, mutate } = useSWR<TodoType[]>("http://localhost:3222/todos");
 
@@ -44,12 +43,6 @@ const TodoList = () => {
 		if (!input.trim()) return;
 
 		try {
-			const token = localStorage.getItem("token");
-			if (!token) {
-				router.push("/login");
-				return;
-			}
-
 			const newTodo = { id: crypto.randomUUID(), title: input.trim() };
 
 			await mutate(
@@ -58,8 +51,8 @@ const TodoList = () => {
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",
-							Authorization: `Bearer ${token}`,
 						},
+						credentials: "include",
 						body: JSON.stringify({ title: input.trim() }),
 					});
 
@@ -84,20 +77,14 @@ const TodoList = () => {
 		if (!todoId) return;
 
 		try {
-			const token = localStorage.getItem("token");
-			if (!token) {
-				router.push("/login");
-				return;
-			}
-
 			await mutate(
 				async (currentTodos = []) => {
 					const res = await fetch(`http://localhost:3222/todos/${todoId}`, {
 						method: "DELETE",
 						headers: {
 							"Content-Type": "application/json",
-							Authorization: `Bearer ${token}`,
 						},
+						credentials: "include",
 					});
 					if (!res.ok) throw new Error("Failed to delete todo");
 					return currentTodos.filter((t) => t.id !== todoId);
@@ -116,20 +103,14 @@ const TodoList = () => {
 	const handleSave = async (todoId: string) => {
 		if (!editContent.trim()) return;
 
-		const token = localStorage.getItem("token");
-		if (!token) {
-			router.push("/login");
-			return;
-		}
-
 		await mutate(
 			async (currentTodos = []) => {
 				const res = await fetch(`http://localhost:3222/todos/${todoId}`, {
 					method: "PUT",
 					headers: {
 						"Content-Type": "application/json",
-						Authorization: `Bearer ${token}`,
 					},
+					credentials: "include",
 					body: JSON.stringify({ content: editContent }),
 				});
 				if (!res.ok) throw new Error("Failed to edit todo");

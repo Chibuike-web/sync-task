@@ -3,35 +3,25 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+async function authFetch() {
+	const res = await fetch("http://localhost:3222/todos", {
+		method: "GET",
+		credentials: "include",
+	});
+	if (!res.ok) throw new Error("Not authenticated");
+	return res.json();
+}
+
 export function useAuthGuard() {
 	const router = useRouter();
 	const [ready, setReady] = useState(false);
+
 	useEffect(() => {
-		const token = localStorage.getItem("token");
-		if (!token) {
-			router.push("/todos/login");
-			return;
-		}
-
-		try {
-			const [, payload] = token.split(".");
-			const decoded = JSON.parse(atob(payload));
-			const isExpired = decoded.exp * 1000 < Date.now();
-
-			if (isExpired) {
-				localStorage.removeItem("token");
+		authFetch()
+			.then(() => setReady(true))
+			.catch(() => {
 				router.push("/todos/login");
-				return;
-			}
-			setReady(true);
-		} catch (err) {
-			console.error("Invalid token", err);
-			localStorage.removeItem("token");
-			router.push("/todos/login");
-			return;
-		} finally {
-			setReady(true);
-		}
+			});
 	}, [router]);
 
 	return ready;

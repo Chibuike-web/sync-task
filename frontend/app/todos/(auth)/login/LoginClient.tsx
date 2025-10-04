@@ -29,6 +29,7 @@ export default function LoginClient() {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(data),
+				credentials: "include",
 			});
 
 			const resData = await res.json();
@@ -41,7 +42,6 @@ export default function LoginClient() {
 				setLoginError(resData.error);
 				return;
 			}
-			localStorage.setItem("token", resData.token);
 			console.log(resData.message);
 			reset();
 			router.push("/todos");

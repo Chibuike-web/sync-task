@@ -8,9 +8,9 @@ export default function SWRProvider({ children }: { children: React.ReactNode })
 			value={{
 				fetcher: async (url: string) => {
 					const res = await fetch(url, {
+						credentials: "include",
 						headers: {
 							"Content-Type": "application/json",
-							Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
 						},
 					});
 
