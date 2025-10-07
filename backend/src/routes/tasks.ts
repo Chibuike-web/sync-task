@@ -10,20 +10,20 @@ import { middleware } from "./middleware";
 
 const router = Router();
 
-router.post("/signup", async (req: Request, res: Response) => {});
+router.post("/sign-up", async (req: Request, res: Response) => {});
 
-router.post("/login", async (req: Request, res: Response) => {});
+router.post("/sign-in", async (req: Request, res: Response) => {});
 
 router.get("/", middleware, async (req: Request & { userId?: string }, res: Response) => {});
 
 router.post("/", middleware, async (req: Request & { userId?: string }, res: Response) => {});
 
 router.delete(
-	"/:todoId",
+	"/:taskId",
 	middleware,
 	async (req: Request & { userId?: string }, res: Response) => {}
 );
 
-router.put("/:todoId", middleware, async (req: Request & { userId?: string }, res: Response) => {});
+router.put("/:taskId", middleware, async (req: Request & { userId?: string }, res: Response) => {});
 
 export default router;

@@ -1,6 +1,5 @@
-import React from "react";
-import Tasks from "./Tasks";
+import TasksClient from "./tasks-client";
 
 export default function Home() {
-	return <Tasks />;
+	return <TasksClient />;
 }

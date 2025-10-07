@@ -8,11 +8,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, X } from "lucide-react";
 import Link from "next/link";
 import { useToggleVisibility } from "@/lib/hooks/useToggleVisibility";
-import { authSchema, FormData } from "@/lib/schemas/authSchema";
+import { authSchema, FormData } from "@/lib/schemas/auth-schema";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function LoginClient() {
+export default function SignInClient() {
 	const {
 		register,
 		reset,
@@ -25,7 +25,7 @@ export default function LoginClient() {
 
 	const onSubmit = async (data: FormData) => {
 		try {
-			const res = await fetch("http://localhost:3222/login", {
+			const res = await fetch("http://localhost:3222/sign-in", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(data),
@@ -35,7 +35,7 @@ export default function LoginClient() {
 			if (!res.ok) {
 				if (res.status === 409) {
 					setLoginError(resData.error);
-					router.push("/signup");
+					router.push("/sign-up");
 					return;
 				}
 				setLoginError(resData.error);
@@ -62,8 +62,8 @@ export default function LoginClient() {
 					</button>
 				</div>
 			)}
-			<form className="mb-4" onSubmit={handleSubmit(onSubmit)}>
-				<fieldset className="mb-4">
+			<form onSubmit={handleSubmit(onSubmit)}>
+				<div className="mb-4">
 					<Label htmlFor="email" className="mb-2">
 						Email
 					</Label>
@@ -73,11 +73,17 @@ export default function LoginClient() {
 						{...register("email")}
 						className="text-[14px] placeholder:text-[14px]"
 						placeholder="you@example.com"
+						aria-describedby="email-error"
+						aria-invalid={!!errors.email}
 					/>
-					{errors.email && <p className="text-red-500 text-[14px] mt-1">{errors.email.message}</p>}
-				</fieldset>
+					{errors.email && (
+						<p id="email-error" className="text-red-500 text-[14px] mt-1">
+							{errors.email.message}
+						</p>
+					)}
+				</div>
 
-				<fieldset className="mb-8 relative">
+				<div className="mb-8 relative">
 					<Label htmlFor="password" className="mb-2">
 						Password
 					</Label>
@@ -88,20 +94,30 @@ export default function LoginClient() {
 							{...register("password")}
 							className="text-[14px] placeholder:text-[14px]"
 							placeholder="Enter your password"
+							aria-describedby="password-error"
+							aria-invalid={!!errors.password}
+							aria-label={toggleVisibility ? "Hide password" : "Show password"}
+							aria-pressed={toggleVisibility}
 						/>
 						<button
 							onClick={handleToggleVisibility}
 							type="button"
 							className="absolute right-2 top-1/2 -translate-y-1/2"
 						>
-							{toggleVisibility ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+							{toggleVisibility ? (
+								<EyeOff className="size-4" aria-hidden="true" />
+							) : (
+								<Eye className="size-4" aria-hidden="true" />
+							)}
 						</button>
 					</div>
 
 					{errors.password && (
-						<p className="text-red-500 text-[14px] mt-1">{errors.password.message}</p>
+						<p id="password-error" className="text-red-500 text-[14px] mt-1">
+							{errors.password.message}
+						</p>
 					)}
-				</fieldset>
+				</div>
 
 				<Button
 					className="w-full disabled:opacity-50"
@@ -112,20 +128,13 @@ export default function LoginClient() {
 					{isSubmitting ? (
 						<span className="flex items-center gap-2" aria-live="polite">
 							<div className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
-							Logging in
+							Signing in ...
 						</span>
 					) : (
-						"Log in"
+						"Sign in"
 					)}
 				</Button>
 			</form>
-
-			<p className="text-sm text-center text-gray-600">
-				Don't have an account?{" "}
-				<Link href="/signup" className="text-blue-600 hover:underline cursor-pointer">
-					Sign Up
-				</Link>
-			</p>
 		</>
 	);
 }

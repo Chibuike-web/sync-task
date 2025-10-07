@@ -14,8 +14,8 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+app.use("/", tasksRouter);
 app.use("/todos", todosRouter);
-app.use("/tasks", tasksRouter);
 
 app.listen(3222, () => {
 	console.log("Server running at http://localhost:3222");

@@ -24,7 +24,7 @@ import { AlertDialogAction, AlertDialogCancel } from "@radix-ui/react-alert-dial
 import { useTaskStore } from "../store/taskStore";
 import { Bell, Plus, Search } from "lucide-react";
 
-export default function Tasks() {
+export default function TasksClient() {
 	const { setTasks } = useTaskStore();
 
 	useEffect(() => {
@@ -43,10 +43,6 @@ export default function Tasks() {
 				<nav className="flex items-center justify-between max-w-[700px] mx-auto px-6 xl:px-0">
 					<h1 className="tracking-[-0.05em] text-[20px] font-bold">SyncTask</h1>
 					<div className="flex gap-6 items-center">
-						<Button className="text-[16px]" size="lg">
-							<Plus className="w-5 h-5" />
-							<span>Create Task</span>
-						</Button>
 						<div className="flex items-center gap-2">
 							<button className="p-2" type="button">
 								<Bell />
@@ -55,10 +51,15 @@ export default function Tasks() {
 								<Search />
 							</button>
 						</div>
+						<button className="bg-foreground rounded-full size-10 text-white font-bold">CM</button>
 					</div>
 				</nav>
 			</header>
-			<main className="flex items-center justify-between max-w-[700px] mx-auto mt-10 px-6 xl:px-0">
+			<main className="flex flex-col items-start gap-y-6 max-w-[700px] mx-auto mt-10 px-6 xl:px-0">
+				<Button className="text-[16px]" size="lg">
+					<Plus className="w-5 h-5" />
+					<span>Create Task</span>
+				</Button>
 				<Tabs defaultValue="all" className="w-full">
 					<TabsList className="w-max">
 						<TabsTrigger value="all">All</TabsTrigger>
@@ -111,7 +112,7 @@ const TaskItem = ({ tasks }: { tasks: Task[] }) => {
 	return (
 		<div className="flex flex-col gap-4">
 			{tasks.map((task) => (
-				<div key={task.id} className=" bg-white border rounded-xl p-4 hover:shadow-md transition">
+				<div key={task.id} className=" bg-white border rounded-xl p-4">
 					<div className="w-full flex justify-between items-center">
 						<div className="flex items-center gap-3 flex-wrap">
 							<h3 className="font-semibold text-[clamp(14px,5vw,18px)] break-words leading-[1.2]">

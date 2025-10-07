@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, X } from "lucide-react";
 import Link from "next/link";
 import { useToggleVisibility } from "@/lib/hooks/useToggleVisibility";
-import { authSchema, FormData } from "@/lib/schemas/authSchema";
+import { authSchema, FormData } from "@/lib/schemas/auth-schema";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
