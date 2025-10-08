@@ -4,7 +4,7 @@ import { Fragment, Suspense, useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { TodoType } from "@/lib/schemas/todoSchema";
+import { TodoType } from "@/lib/schemas/todo-schema";
 import { useAuthGuard } from "./hooks/useAuth";
 import useSWR from "swr";
 
@@ -49,9 +49,7 @@ const TodoList = () => {
 				async (currentTodos = []) => {
 					const res = await fetch("http://localhost:3222/todos", {
 						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-						},
+						headers: { "Content-Type": "application/json" },
 						credentials: "include",
 						body: JSON.stringify({ title: input.trim() }),
 					});
@@ -81,9 +79,7 @@ const TodoList = () => {
 				async (currentTodos = []) => {
 					const res = await fetch(`http://localhost:3222/todos/${todoId}`, {
 						method: "DELETE",
-						headers: {
-							"Content-Type": "application/json",
-						},
+						headers: { "Content-Type": "application/json" },
 						credentials: "include",
 					});
 					if (!res.ok) throw new Error("Failed to delete todo");
@@ -107,9 +103,7 @@ const TodoList = () => {
 			async (currentTodos = []) => {
 				const res = await fetch(`http://localhost:3222/todos/${todoId}`, {
 					method: "PUT",
-					headers: {
-						"Content-Type": "application/json",
-					},
+					headers: { "Content-Type": "application/json" },
 					credentials: "include",
 					body: JSON.stringify({ content: editContent }),
 				});

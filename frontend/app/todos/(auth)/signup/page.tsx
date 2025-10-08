@@ -1,4 +1,4 @@
-import SignupClient from "./SignupClient";
+import SignupClient from "./signup-client";
 
 export default function Signup() {
 	return (

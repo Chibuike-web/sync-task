@@ -9,7 +9,10 @@
 		"lint": "tsc --noEmit",
 		"db:generate:todos": "drizzle-kit generate --config=drizzle.config.todos.ts",
 		"db:push:todos": "drizzle-kit push --config=drizzle.config.todos.ts",
-		"db:migrate:todos": "pnpm db:generate:todos && pnpm db:push:todos --config=drizzle.config.todos.ts"
+		"db:migrate:todos": "pnpm db:generate:todos && pnpm db:push:todos --config=drizzle.config.todos.ts",
+		"db:generate:tasks": "drizzle-kit generate --config=drizzle.config.tasks.ts",
+		"db:push:tasks": "drizzle-kit push --config=drizzle.config.tasks.ts",
+		"db:migrate:tasks": "pnpm db:generate:tasks && pnpm db:push:tasks --config=drizzle.config.tasks.ts"
 	},
 	"keywords": [],
 	"author": "",

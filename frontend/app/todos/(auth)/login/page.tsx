@@ -1,5 +1,4 @@
-import React from "react";
-import LoginClient from "./LoginClient";
+import LoginClient from "./login-client";
 
 export default function Login() {
 	return (

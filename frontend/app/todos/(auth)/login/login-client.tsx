@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, X } from "lucide-react";
 import Link from "next/link";
-import { useToggleVisibility } from "@/lib/hooks/useToggleVisibility";
+import { useToggleVisibility } from "@/lib/hooks/use-toggle-visibility";
 import { authSchema, FormData } from "@/lib/schemas/auth-schema";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -34,12 +34,8 @@ export default function LoginClient() {
 
 			const resData = await res.json();
 			if (!res.ok) {
-				if (res.status === 409) {
-					setLoginError(resData.error);
-					router.push("/todos/signup");
-					return;
-				}
 				setLoginError(resData.error);
+				router.push("/todos/signup");
 				return;
 			}
 			console.log(resData.message);

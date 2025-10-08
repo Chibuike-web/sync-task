@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 export const authSchema = z.object({
+	firstName: z.string().optional(),
+	lastName: z.string().optional(),
 	id: z.string().optional(),
 	email: z
 		.string()
@@ -13,4 +15,4 @@ export const authSchema = z.object({
 		.min(6, "Password must contain at least 6 character"),
 });
 
-export type UserType = z.infer<typeof authSchema>;
+export type FormData = z.infer<typeof authSchema>;

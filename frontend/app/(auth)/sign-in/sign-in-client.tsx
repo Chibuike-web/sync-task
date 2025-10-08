@@ -6,8 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, X } from "lucide-react";
-import Link from "next/link";
-import { useToggleVisibility } from "@/lib/hooks/useToggleVisibility";
+import { useToggleVisibility } from "@/lib/hooks/use-toggle-visibility";
 import { authSchema, FormData } from "@/lib/schemas/auth-schema";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -21,7 +20,7 @@ export default function SignInClient() {
 	} = useForm({ resolver: zodResolver(authSchema) });
 	const router = useRouter();
 	const { toggleVisibility, handleToggleVisibility } = useToggleVisibility();
-	const [loginError, setLoginError] = useState("");
+	const [signInError, setSignInError] = useState("");
 
 	const onSubmit = async (data: FormData) => {
 		try {
@@ -29,35 +28,30 @@ export default function SignInClient() {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(data),
+				credentials: "include",
 			});
 
 			const resData = await res.json();
 			if (!res.ok) {
-				if (res.status === 409) {
-					setLoginError(resData.error);
-					router.push("/sign-up");
-					return;
-				}
-				setLoginError(resData.error);
+				setSignInError(resData.error);
+				router.push("/sign-up");
 				return;
 			}
-			localStorage.setItem("token", resData.token);
-			localStorage.setItem("todos", JSON.stringify(resData.todos));
-			console.log(resData.message);
+
 			reset();
 			router.push("/");
 		} catch (err) {
 			console.error("Issue authenticating user", err);
-			setLoginError("Something went wrong. Please try again.");
+			setSignInError("Something went wrong. Please try again.");
 		}
 	};
 
 	return (
 		<>
-			{loginError && (
+			{signInError && (
 				<div className="flex justify-between items-center gap-2 px-3 py-2 mb-4 bg-red-100 text-red-700 text-sm font-medium rounded-md border border-red-200 shadow-sm">
-					{loginError}
-					<button type="button" onClick={() => setLoginError("")} className="text-red-700">
+					{signInError}
+					<button type="button" onClick={() => setSignInError("")} className="text-red-700">
 						<X size={20} />
 					</button>
 				</div>

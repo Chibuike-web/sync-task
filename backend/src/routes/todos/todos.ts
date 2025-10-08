@@ -1,13 +1,13 @@
 import { Request, Response, Router } from "express";
-import { JWT_SECRET } from "../config";
+import { JWT_SECRET } from "../../config";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { SignJWT } from "jose";
-import { authSchema } from "../../schemas/todos/authSchema";
-import { db } from "../../todos/lib/index";
-import { todos } from "../../todos/lib/schema";
+import { authSchema } from "../../../schemas/auth-schema";
+import { db } from "../../../todos/lib/index";
+import { todos } from "../../../todos/lib/schema";
 import { and, eq } from "drizzle-orm";
-import { users } from "../../todos/lib/schema";
+import { users } from "../../../todos/lib/schema";
 import { middleware } from "./middleware";
 
 const router = Router();
@@ -24,8 +24,7 @@ router.post("/signup", async (req: Request, res: Response) => {
 		const existingUser = db.select().from(users).where(eq(users.email, email)).get();
 		if (existingUser) return res.status(409).json({ error: "User already exist. Log in instead" });
 
-		const saltRounds = 10;
-		const hashedPassword = await bcrypt.hash(password, saltRounds);
+		const hashedPassword = await bcrypt.hash(password, 10);
 		db.insert(users)
 			.values({
 				email,
@@ -35,7 +34,7 @@ router.post("/signup", async (req: Request, res: Response) => {
 
 		return res.status(200).json({ message: "User successfully registered" });
 	} catch (error) {
-		console.error("Signup error:", error);
+		console.error("Sign up error:", error);
 		res.status(500).json({ success: false, message: "Internal server error" });
 	}
 });
@@ -43,9 +42,7 @@ router.post("/signup", async (req: Request, res: Response) => {
 router.post("/login", async (req: Request, res: Response) => {
 	try {
 		const parsed = authSchema.safeParse(req.body);
-		if (!parsed.success) {
-			return res.status(400).json({ error: "Invalid input" });
-		}
+		if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
 
 		const { email, password } = parsed.data;
 		const existingUser = db.select().from(users).where(eq(users.email, email)).get();
@@ -60,10 +57,10 @@ router.post("/login", async (req: Request, res: Response) => {
 			.setExpirationTime("1h")
 			.sign(JWT_SECRET);
 
-		res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "none" });
+		res.cookie("token_todos", token, { httpOnly: true, secure: true, sameSite: "none" });
 		res.json({ message: "Logged in successfully" });
-	} catch (err) {
-		console.error("Login failed:", err);
+	} catch (error) {
+		console.error("Login failed:", error);
 		return res.status(500).json({ error: "Internal server error" });
 	}
 });

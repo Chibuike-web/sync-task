@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import todosRouter from "./routes/todos";
-import tasksRouter from "./routes/tasks";
+import todosRouter from "./routes/todos/todos";
+import tasksRouter from "./routes/tasks/tasks";
 
 const app = express();
 app.use(
