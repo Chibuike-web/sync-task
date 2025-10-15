@@ -3,7 +3,6 @@
 import { Fragment, Suspense, useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { TodoType } from "@/lib/schemas/todo-schema";
 import { useAuthGuard } from "./hooks/useAuth";
 import useSWR from "swr";

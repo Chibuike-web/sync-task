@@ -6,9 +6,9 @@ import Link from "next/link";
 
 export default function SignIn() {
 	return (
-		<main className="flex items-center justify-center h-screen bg-gray-50 px-4">
-			<div className="shadow-xl rounded-2xl bg-foreground/1 w-full max-w-[450px]">
-				<div className="w-full bg-white p-8 flex flex-col border-b border-foreground/10 rounded-t-2xl rounded-b-xl">
+		<main className="grid place-items-center min-h-screen px-6 xl:px-0 bg-white">
+			<div className="shadow-xl bg-accent rounded-2xl overflow-hidden my-20 border-2 border-accent">
+				<div className="w-full max-w-[500px] p-8 md:p-10 bg-white rounded-xl ring-2 ring-accent">
 					<span className="tracking-[-0.02em] text-[18px] font-bold text-center">SyncTask</span>
 					<div className="text-center">
 						<h1 className="text-[20px] font-semibold text-gray-900 mb-1 mt-6">

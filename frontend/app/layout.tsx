@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import SWRProvider from "@/lib/swr-config";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -13,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Sync Task",
+	title: "SyncTask",
 	description: "Todo app that sync with your google calendar",
 };
 
@@ -24,7 +25,10 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+				{" "}
+				<SWRProvider>{children}</SWRProvider>
+			</body>
 		</html>
 	);
 }

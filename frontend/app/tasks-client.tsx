@@ -3,7 +3,7 @@
 import { EllipsisVertical } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { initialTasks, Task } from "../lib/data";
 import {
 	DropdownMenu,
@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
 	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
 	AlertDialogFooter,
@@ -20,12 +22,16 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { AlertDialogAction, AlertDialogCancel } from "@radix-ui/react-alert-dialog";
 import { useTaskStore } from "../store/taskStore";
 import { Bell, Plus, Search } from "lucide-react";
+import CreateTaskModal from "@/components/create-task-modal";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 export default function TasksClient() {
 	const { setTasks } = useTaskStore();
+	const [isCreateTask, setIsCreateTask] = useState(false);
+	const [isDeleteTask, setIsDeleteTask] = useState(false);
+	const [isEditTask, setIsEditTask] = useState(false);
 
 	useEffect(() => {
 		const stored = localStorage.getItem("tasks");
@@ -56,10 +62,13 @@ export default function TasksClient() {
 				</nav>
 			</header>
 			<main className="flex flex-col items-start gap-y-6 max-w-[700px] mx-auto mt-10 px-6 xl:px-0">
-				<Button className="text-[16px]" size="lg">
-					<Plus className="w-5 h-5" />
-					<span>Create Task</span>
-				</Button>
+				<Dialog>
+					<DialogTrigger className="text-[16px] flex gap-2 bg-foreground h-10 px-4 text-white items-center justify-center rounded-[10px]">
+						<Plus className="w-5 h-5" />
+						<span>Create Task</span>
+					</DialogTrigger>
+					<CreateTaskModal />
+				</Dialog>
 				<Tabs defaultValue="all" className="w-full">
 					<TabsList className="w-max">
 						<TabsTrigger value="all">All</TabsTrigger>

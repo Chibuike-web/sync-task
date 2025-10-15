@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, X } from "lucide-react";
 import Link from "next/link";
 import { useToggleVisibility } from "@/lib/hooks/use-toggle-visibility";
 import { authSchema, FormData } from "@/lib/schemas/auth-schema";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function SignupClient() {
 	const {
@@ -19,10 +19,9 @@ export default function SignupClient() {
 		handleSubmit,
 		formState: { errors, isSubmitting },
 	} = useForm({ resolver: zodResolver(authSchema) });
+
 	const router = useRouter();
-
 	const [registrationError, setRegistrationError] = useState("");
-
 	const { toggleVisibility, handleToggleVisibility } = useToggleVisibility();
 
 	const onSubmit = async (data: FormData) => {
@@ -38,6 +37,7 @@ export default function SignupClient() {
 				if (res.status === 400) {
 					const error = resData.error;
 					setRegistrationError(error);
+					return;
 				} else if (res.status === 409) {
 					const error = resData.error;
 					setRegistrationError(error);
@@ -45,6 +45,7 @@ export default function SignupClient() {
 						router.push("/todos/login");
 						reset();
 					}, 1000);
+					return;
 				} else {
 					setRegistrationError(resData.error || "Something went wrong");
 				}
@@ -69,7 +70,7 @@ export default function SignupClient() {
 				</div>
 			)}
 			<form className="mb-4" onSubmit={handleSubmit(onSubmit)}>
-				<fieldset className="mb-4">
+				<div className="mb-4">
 					<Label htmlFor="email" className="mb-2">
 						Email
 					</Label>
@@ -80,16 +81,16 @@ export default function SignupClient() {
 						className="text-[14px] placeholder:text-[14px]"
 						placeholder="you@example.com"
 						aria-describedby={errors.email ? "email-error" : undefined}
-						aria-invalid={errors.email ? true : false}
+						aria-invalid={!!errors.email}
 					/>
 					{errors.email && (
 						<p id="email-error" className="text-red-500 text-[14px] mt-1">
 							{errors.email.message}
 						</p>
 					)}
-				</fieldset>
+				</div>
 
-				<fieldset className="mb-8 relative">
+				<div className="mb-8 relative">
 					<Label htmlFor="password" className="mb-2">
 						Password
 					</Label>
@@ -101,7 +102,7 @@ export default function SignupClient() {
 							className="text-[14px] placeholder:text-[14px]"
 							placeholder="Enter your password"
 							aria-describedby={errors.password ? "password-error" : undefined}
-							aria-invalid={errors.password ? true : false}
+							aria-invalid={!!errors.password}
 						/>
 						<button
 							onClick={handleToggleVisibility}
@@ -117,7 +118,7 @@ export default function SignupClient() {
 							{errors.password.message}
 						</p>
 					)}
-				</fieldset>
+				</div>
 
 				<Button
 					className="w-full disabled:opacity-50"
