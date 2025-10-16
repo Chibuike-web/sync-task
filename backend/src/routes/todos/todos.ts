@@ -58,7 +58,7 @@ router.post("/login", async (req: Request, res: Response) => {
 			.sign(JWT_SECRET);
 
 		res.cookie("token_todos", token, { httpOnly: true, secure: true, sameSite: "none" });
-		res.json({ message: "Logged in successfully" });
+		res.status(201).json({ message: "Logged in successfully" });
 	} catch (error) {
 		console.error("Login failed:", error);
 		return res.status(500).json({ error: "Internal server error" });

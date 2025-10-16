@@ -63,7 +63,10 @@ export default function TasksClient() {
 			</header>
 			<main className="flex flex-col items-start gap-y-6 max-w-[700px] mx-auto mt-10 px-6 xl:px-0">
 				<Dialog>
-					<DialogTrigger className="text-[16px] flex gap-2 bg-foreground h-10 px-4 text-white items-center justify-center rounded-[10px]">
+					<DialogTrigger
+						id="create-task-description"
+						className="text-[16px] flex gap-2 bg-foreground h-10 px-4 text-white items-center justify-center rounded-[10px]"
+					>
 						<Plus className="w-5 h-5" />
 						<span>Create Task</span>
 					</DialogTrigger>

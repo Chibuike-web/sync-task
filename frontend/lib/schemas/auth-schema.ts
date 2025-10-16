@@ -1,9 +1,18 @@
 import { z } from "zod";
 
 export const authSchema = z.object({
-	firstName: z.string().optional(),
-	lastName: z.string().optional(),
-	id: z.string().optional(),
+	firstName: z
+		.string()
+		.optional()
+		.refine((val) => !val || /^[A-Za-z]+(?:\s[A-Za-z]+)*$/.test(val), {
+			message: "First name must contain only letters",
+		}),
+	lastName: z
+		.string()
+		.optional()
+		.refine((val) => !val || /^[A-Za-z]+(?:\s[A-Za-z]+)*$/.test(val), {
+			message: "Last name must contain only letters",
+		}),
 	email: z
 		.string()
 		.min(1, "Email is required")

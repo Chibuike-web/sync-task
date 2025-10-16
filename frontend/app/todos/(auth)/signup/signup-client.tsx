@@ -21,7 +21,7 @@ export default function SignupClient() {
 	} = useForm({ resolver: zodResolver(authSchema) });
 
 	const router = useRouter();
-	const [registrationError, setRegistrationError] = useState("");
+	const [signUpError, setSignUpError] = useState("");
 	const { toggleVisibility, handleToggleVisibility } = useToggleVisibility();
 
 	const onSubmit = async (data: FormData) => {
@@ -36,18 +36,18 @@ export default function SignupClient() {
 			if (!res.ok) {
 				if (res.status === 400) {
 					const error = resData.error;
-					setRegistrationError(error);
+					setSignUpError(error);
 					return;
 				} else if (res.status === 409) {
 					const error = resData.error;
-					setRegistrationError(error);
+					setSignUpError(error);
 					setTimeout(() => {
 						router.push("/todos/login");
 						reset();
 					}, 1000);
 					return;
 				} else {
-					setRegistrationError(resData.error || "Something went wrong");
+					setSignUpError(resData.error || "Something went wrong");
 				}
 				return;
 			}
@@ -55,16 +55,16 @@ export default function SignupClient() {
 			router.push("/todos/login");
 		} catch (err) {
 			console.error("Issue registering user:", err);
-			setRegistrationError("Something went wrong. Please try again.");
+			setSignUpError("Something went wrong. Please try again.");
 		}
 	};
 
 	return (
 		<>
-			{registrationError && (
+			{signUpError && (
 				<div className="flex justify-between items-center gap-2 px-3 py-2 mb-4 bg-red-100 text-red-700 text-sm font-medium rounded-md border border-red-200 shadow-sm">
-					{registrationError}
-					<button type="button" onClick={() => setRegistrationError("")} className="text-red-700">
+					{signUpError}
+					<button type="button" onClick={() => setSignUpError("")} className="text-red-700">
 						<X size={20} />
 					</button>
 				</div>

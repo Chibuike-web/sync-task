@@ -14,7 +14,8 @@ export async function middleware(
 		const { payload } = await jwtVerify(token, JWT_SECRET);
 		req.userId = payload.userId as string;
 		next();
-	} catch (err) {
+	} catch (error) {
+		console.error(error);
 		return res.status(401).json({ error: "Invalid or expired token" });
 	}
 }
