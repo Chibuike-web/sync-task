@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const taskSchema = z.object({
+	taskId: z.string().optional(),
 	taskName: z.string().min(1, "Task name is required"),
 	taskDescription: z.string().min(1, "Task description is required"),
 	taskStatus: z.string().min(1, "Task status is required"),

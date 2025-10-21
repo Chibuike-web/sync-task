@@ -18,10 +18,6 @@ export default function SWRProvider({ children }: { children: React.ReactNode })
 					const data = await res.json();
 					return Array.isArray(data) ? data : [];
 				},
-				suspense: true,
-				fallback: {
-					"http://localhost:3222/todos": [],
-				},
 			}}
 		>
 			{children}

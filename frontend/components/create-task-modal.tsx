@@ -1,8 +1,8 @@
-import { useState } from "react";
+"use client";
+
 import { DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { TaskErrors } from "@/lib/types";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { CalendarIcon, X } from "lucide-react";
@@ -13,6 +13,8 @@ import { Button } from "./ui/button";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { taskSchema, TaskType } from "@/lib/schemas/task-schema";
+import { useTaskStore } from "@/store/taskStore";
+import { useOptimistic, useTransition } from "react";
 
 export default function CreateTaskModal() {
 	const {
@@ -25,7 +27,28 @@ export default function CreateTaskModal() {
 		resolver: zodResolver(taskSchema),
 	});
 
-	const onSubmit = (data: TaskType) => {};
+	const { tasks, setTasks, addTask } = useTaskStore();
+	const [optimisticTasks, setOptimisticTasks] = useOptimistic(tasks);
+	const [isPending, startTransition] = useTransition();
+
+	const onSubmit = (data: TaskType) => {
+		startTransition(async () => {
+			setOptimisticTasks([...tasks, data]);
+			try {
+				const res = await fetch("http://localhost:3222", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					credentials: "include",
+					body: JSON.stringify(data),
+				});
+				const resData = await res.json();
+				if (!res.ok) {
+					console.error(resData.error);
+					throw new Error("Issue creating tasks");
+				}
+			} catch (error) {}
+		});
+	};
 
 	return (
 		<DialogContent
@@ -38,7 +61,7 @@ export default function CreateTaskModal() {
 			<DialogHeader className="flex justify-between items-center">
 				<DialogTitle className="text-xl font-semibold text-left">Create Task</DialogTitle>
 				<DialogClose data-slot="dialog-close">
-					<X className="size-4s" />
+					<X className="size-6" />
 					<span className="sr-only">Close</span>
 				</DialogClose>
 			</DialogHeader>
@@ -125,17 +148,13 @@ export default function CreateTaskModal() {
 											data-empty={!field.value}
 											aria-describedby={errors.taskStartDate ? "task-start-date-error" : undefined}
 											aria-invalid={!!errors.taskStartDate}
-											className="data-[empty=true]:text-muted-foreground justify-between text-left font-normal active:scale-100"
+											className="data-[empty=true]:text-muted-foreground justify-between text-left font-normal active:scale-100 text-[16px]"
 										>
-											{field.value ? (
-												format(field.value, "PPP")
-											) : (
-												<span className="text-[16px]">Enter start date</span>
-											)}
+											{field.value ? format(field.value, "PPP") : <span>Enter start date</span>}
 											<CalendarIcon className="size-4" />
 										</Button>
 									</PopoverTrigger>
-									<PopoverContent>
+									<PopoverContent align="start">
 										<Calendar
 											mode="single"
 											selected={field.value ? new Date(field.value) : undefined}
@@ -165,19 +184,15 @@ export default function CreateTaskModal() {
 										<Button
 											variant="outline"
 											data-empty={!field.value}
-											className="data-[empty=true]:text-muted-foreground justify-between text-left font-normal active:scale-100"
+											className="data-[empty=true]:text-muted-foreground justify-between text-left font-normal active:scale-100 text-[16px]"
 											aria-describedby={errors.taskDueDate ? "task-due-date-error" : undefined}
 											aria-invalid={!!errors.taskDueDate}
 										>
-											{field.value ? (
-												format(field.value, "PPP")
-											) : (
-												<span className="text-[16px]">Enter due date</span>
-											)}
+											{field.value ? format(field.value, "PPP") : <span>Enter due date</span>}
 											<CalendarIcon className="size-4" />
 										</Button>
 									</PopoverTrigger>
-									<PopoverContent>
+									<PopoverContent align="start">
 										<Calendar
 											mode="single"
 											selected={field.value ? new Date(field.value) : undefined}

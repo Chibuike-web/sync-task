@@ -35,7 +35,6 @@ export default function LoginClient() {
 			const resData = await res.json();
 			if (!res.ok) {
 				setLoginError(resData.error);
-				router.push("/todos/signup");
 				return;
 			}
 			console.log(resData.message);

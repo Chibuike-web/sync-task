@@ -34,7 +34,6 @@ export default function SignInClient() {
 			const resData = await res.json();
 			if (!res.ok) {
 				setSignInError(resData.error);
-				router.push("/sign-up");
 				return;
 			}
 

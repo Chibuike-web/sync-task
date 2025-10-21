@@ -1,9 +1,7 @@
 "use client";
 
-import { EllipsisVertical } from "lucide-react";
+import { EllipsisVertical, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
 import { initialTasks, Task } from "../lib/data";
 import {
 	DropdownMenu,
@@ -26,23 +24,9 @@ import { useTaskStore } from "../store/taskStore";
 import { Bell, Plus, Search } from "lucide-react";
 import CreateTaskModal from "@/components/create-task-modal";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { TaskType } from "@/lib/schemas/task-schema";
 
 export default function TasksClient() {
-	const { setTasks } = useTaskStore();
-	const [isCreateTask, setIsCreateTask] = useState(false);
-	const [isDeleteTask, setIsDeleteTask] = useState(false);
-	const [isEditTask, setIsEditTask] = useState(false);
-
-	useEffect(() => {
-		const stored = localStorage.getItem("tasks");
-		if (stored) {
-			const parsedTasks = JSON.parse(stored);
-			setTasks(parsedTasks);
-		} else {
-			localStorage.setItem("tasks", JSON.stringify(initialTasks));
-			setTasks(initialTasks);
-		}
-	}, []);
 	return (
 		<>
 			<header className="py-6 border-b border-sidebar-border">
@@ -104,52 +88,52 @@ const AllTasks = () => {
 
 const StartedTasks = () => {
 	const { tasks } = useTaskStore();
-	const startedTasks = tasks.filter((t) => t.status === "started");
+	const startedTasks = tasks.filter((t) => t.taskStatus === "started");
 	return <TaskItem tasks={startedTasks} />;
 };
 
 const NotStartedTasks = () => {
 	const { tasks } = useTaskStore();
-	const notStartedTasks = tasks.filter((t) => t.status === "not started");
+	const notStartedTasks = tasks.filter((t) => t.taskStatus === "not started");
 	return <TaskItem tasks={notStartedTasks} />;
 };
 
 const CompletedTasks = () => {
 	const { tasks } = useTaskStore();
-	const completedTasks = tasks.filter((t) => t.status === "completed");
+	const completedTasks = tasks.filter((t) => t.taskStatus === "completed");
 	return <TaskItem tasks={completedTasks} />;
 };
 
-const TaskItem = ({ tasks }: { tasks: Task[] }) => {
+const TaskItem = ({ tasks }: { tasks: TaskType[] }) => {
 	return (
 		<div className="flex flex-col gap-4">
 			{tasks.map((task) => (
-				<div key={task.id} className=" bg-white border rounded-xl p-4">
+				<div key={task.taskId} className=" bg-white border rounded-xl p-4">
 					<div className="w-full flex justify-between items-center">
 						<div className="flex items-center gap-3 flex-wrap">
 							<h3 className="font-semibold text-[clamp(14px,5vw,18px)] break-words leading-[1.2]">
-								{task.title}
+								{task.taskName}
 							</h3>
 
 							<div className="flex items-center gap-2">
 								{/* Status Badge */}
 								<span
 									className={`inline-block px-2 py-1 text-[clamp(10px,2vw,12px)] font-medium rounded-full leading-[1]
-						${task.status === "not started" ? "bg-gray-100 text-gray-700" : ""}
-						${task.status === "started" ? "bg-yellow-100 text-yellow-700" : ""}
-						${task.status === "completed" ? "bg-green-100 text-green-700" : ""}`}
+						${task.taskStatus === "not started" ? "bg-gray-100 text-gray-700" : ""}
+						${task.taskStatus === "started" ? "bg-yellow-100 text-yellow-700" : ""}
+						${task.taskStatus === "completed" ? "bg-green-100 text-green-700" : ""}`}
 								>
-									{task.status}
+									{task.taskStatus}
 								</span>
 
 								{/* Priority Badge */}
 								<span
 									className={`inline-block px-2 py-1 text-[clamp(10px,2vw,12px)] font-medium rounded-full leading-[1]
-						${task.priority === "low" ? "bg-gray-100 text-gray-700" : ""}
-						${task.priority === "medium" ? "bg-blue-100 text-blue-700" : ""}
-						${task.priority === "high" ? "bg-red-100 text-red-700" : ""}`}
+						${task.taskPriority === "low" ? "bg-gray-100 text-gray-700" : ""}
+						${task.taskPriority === "medium" ? "bg-blue-100 text-blue-700" : ""}
+						${task.taskPriority === "high" ? "bg-red-100 text-red-700" : ""}`}
 								>
-									{task.priority}
+									{task.taskPriority}
 								</span>
 							</div>
 						</div>
@@ -176,27 +160,29 @@ const TaskItem = ({ tasks }: { tasks: Task[] }) => {
 										</DropdownMenuItem>
 									</AlertDialogTrigger>
 									<AlertDialogContent>
-										<AlertDialogHeader>
-											<AlertDialogTitle>Delete Post</AlertDialogTitle>
-											<AlertDialogDescription>
-												Are you sure you want to delete this post? This action cannot be undone.
-											</AlertDialogDescription>
-										</AlertDialogHeader>
-										<AlertDialogFooter>
-											<AlertDialogCancel>
-												<Button variant="outline">Cancel</Button>
+										<AlertDialogHeader className="flex justify-between w-full">
+											<AlertDialogTitle>Delete Task</AlertDialogTitle>
+											<AlertDialogCancel
+												variant="ghost"
+												className="size-10 px-0 py-0 flex items-center justify-center"
+											>
+												<X className="size-5" />
 											</AlertDialogCancel>
-											<AlertDialogAction>
-												{" "}
-												<Button variant="destructive">Delete</Button>
-											</AlertDialogAction>
+										</AlertDialogHeader>
+										<AlertDialogDescription>
+											Are you sure you want to delete this task? This action cannot be undone.
+										</AlertDialogDescription>
+
+										<AlertDialogFooter>
+											<AlertDialogCancel>Cancel</AlertDialogCancel>
+											<AlertDialogAction variant="destructive">Delete</AlertDialogAction>
 										</AlertDialogFooter>
 									</AlertDialogContent>
 								</AlertDialog>
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</div>
-					<p className="mt-2">{task.description}</p>
+					<p className="mt-2">{task.taskDescription}</p>
 				</div>
 			))}
 		</div>

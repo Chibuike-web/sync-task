@@ -24,9 +24,7 @@ export default function Todos() {
 				<h1>Chibuike</h1>
 				<Button variant="outline">Sign out</Button>
 			</header>
-			<Suspense fallback={<p className="text-center mt-10">Loading todos…</p>}>
-				<TodoList />
-			</Suspense>
+			<TodoList />
 		</>
 	);
 }
@@ -36,7 +34,7 @@ const TodoList = () => {
 	const [editId, setEditId] = useState("");
 	const [editContent, setEditContent] = useState("");
 
-	const { data, error, mutate } = useSWR<TodoType[]>("http://localhost:3222/todos");
+	const { data, error, isLoading, mutate } = useSWR<TodoType[]>("http://localhost:3222/todos");
 
 	const handleAdd = async () => {
 		if (!input.trim()) return;
@@ -128,9 +126,8 @@ const TodoList = () => {
 		}
 	}, [editId]);
 
-	if (error) {
-		return <p>Issue fetching todos</p>;
-	}
+	if (isLoading) return <p>Loading...</p>;
+	if (error) return <p>Issue fetching todos</p>;
 
 	return (
 		<main className="flex flex-col mt-10 items-center px-6 xl:px-0 max-w-[600px] mx-auto">
