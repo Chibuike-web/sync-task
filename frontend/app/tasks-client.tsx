@@ -2,7 +2,6 @@
 
 import { EllipsisVertical, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { initialTasks, Task } from "../lib/data";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -20,13 +19,50 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useTaskStore } from "../store/taskStore";
 import { Bell, Plus, Search } from "lucide-react";
 import CreateTaskModal from "@/components/create-task-modal";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { TaskType } from "@/lib/schemas/task-schema";
+import { useOptimistic, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { createTaskAction } from "@/actions/create-task-action";
 
-export default function TasksClient() {
+function getStatusColor(status: string) {
+	return cn({
+		"bg-gray-100 text-gray-700": status === "not started",
+		"bg-yellow-100 text-yellow-700": status === "started",
+		"bg-green-100 text-green-700": status === "completed",
+	});
+}
+
+function getPriorityColor(priority: string) {
+	return cn({
+		"bg-gray-100 text-gray-700": priority === "low",
+		"bg-blue-100 text-blue-700": priority === "medium",
+		"bg-red-100 text-red-700": priority === "high",
+	});
+}
+
+export default function TasksClient({ tasks }: { tasks: TaskType[] }) {
+	const router = useRouter();
+	const [optimisticTasks, setOptimisticTasks] = useOptimistic(tasks);
+	const [isPending, startTransition] = useTransition();
+	const startedTasks = optimisticTasks.filter((t) => t.taskStatus === "started");
+	const notStartedTasks = optimisticTasks.filter((t) => t.taskStatus === "not started");
+	const completedTasks = optimisticTasks.filter((t) => t.taskStatus === "completed");
+
+	const handleCreateTask = (data: TaskType) => {
+		startTransition(async () => {
+			const tempTask = { ...data, taskId: `temp-${Date.now()}` };
+			setOptimisticTasks([...tasks, tempTask]);
+			try {
+				await createTaskAction(data);
+			} catch (error) {
+				console.error(error);
+			}
+		});
+	};
 	return (
 		<>
 			<header className="py-6 border-b border-sidebar-border">
@@ -54,7 +90,7 @@ export default function TasksClient() {
 						<Plus className="w-5 h-5" />
 						<span>Create Task</span>
 					</DialogTrigger>
-					<CreateTaskModal />
+					<CreateTaskModal onSubmit={handleCreateTask} />
 				</Dialog>
 				<Tabs defaultValue="all" className="w-full">
 					<TabsList className="w-max">
@@ -64,45 +100,22 @@ export default function TasksClient() {
 						<TabsTrigger value="completed">Completed</TabsTrigger>
 					</TabsList>
 					<TabsContent value="all">
-						<AllTasks />
+						<TaskItem tasks={optimisticTasks} />
 					</TabsContent>
 					<TabsContent value="started">
-						<StartedTasks />
+						<TaskItem tasks={startedTasks} />
 					</TabsContent>
 					<TabsContent value="not started">
-						<NotStartedTasks />
+						<TaskItem tasks={notStartedTasks} />
 					</TabsContent>
 					<TabsContent value="completed">
-						<CompletedTasks />
+						<TaskItem tasks={completedTasks} />
 					</TabsContent>
 				</Tabs>
 			</main>
 		</>
 	);
 }
-
-const AllTasks = () => {
-	const { tasks } = useTaskStore();
-	return <TaskItem tasks={tasks} />;
-};
-
-const StartedTasks = () => {
-	const { tasks } = useTaskStore();
-	const startedTasks = tasks.filter((t) => t.taskStatus === "started");
-	return <TaskItem tasks={startedTasks} />;
-};
-
-const NotStartedTasks = () => {
-	const { tasks } = useTaskStore();
-	const notStartedTasks = tasks.filter((t) => t.taskStatus === "not started");
-	return <TaskItem tasks={notStartedTasks} />;
-};
-
-const CompletedTasks = () => {
-	const { tasks } = useTaskStore();
-	const completedTasks = tasks.filter((t) => t.taskStatus === "completed");
-	return <TaskItem tasks={completedTasks} />;
-};
 
 const TaskItem = ({ tasks }: { tasks: TaskType[] }) => {
 	return (
@@ -118,20 +131,20 @@ const TaskItem = ({ tasks }: { tasks: TaskType[] }) => {
 							<div className="flex items-center gap-2">
 								{/* Status Badge */}
 								<span
-									className={`inline-block px-2 py-1 text-[clamp(10px,2vw,12px)] font-medium rounded-full leading-[1]
-						${task.taskStatus === "not started" ? "bg-gray-100 text-gray-700" : ""}
-						${task.taskStatus === "started" ? "bg-yellow-100 text-yellow-700" : ""}
-						${task.taskStatus === "completed" ? "bg-green-100 text-green-700" : ""}`}
+									className={cn(
+										"inline-block px-2 py-1 text-[clamp(10px,2vw,12px)] font-medium rounded-full leading-[1]",
+										getStatusColor(task.taskStatus)
+									)}
 								>
 									{task.taskStatus}
 								</span>
 
 								{/* Priority Badge */}
 								<span
-									className={`inline-block px-2 py-1 text-[clamp(10px,2vw,12px)] font-medium rounded-full leading-[1]
-						${task.taskPriority === "low" ? "bg-gray-100 text-gray-700" : ""}
-						${task.taskPriority === "medium" ? "bg-blue-100 text-blue-700" : ""}
-						${task.taskPriority === "high" ? "bg-red-100 text-red-700" : ""}`}
+									className={cn(
+										"inline-block px-2 py-1 text-[clamp(10px,2vw,12px)] font-medium rounded-full leading-[1]",
+										getPriorityColor(task.taskPriority)
+									)}
 								>
 									{task.taskPriority}
 								</span>

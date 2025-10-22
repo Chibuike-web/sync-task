@@ -13,10 +13,10 @@ import { Button } from "./ui/button";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { taskSchema, TaskType } from "@/lib/schemas/task-schema";
-import { useTaskStore } from "@/store/taskStore";
-import { useOptimistic, useTransition } from "react";
+import { useRef } from "react";
 
-export default function CreateTaskModal() {
+export default function CreateTaskModal({ onSubmit }: { onSubmit: (data: TaskType) => void }) {
+	const closeButtonRef = useRef<HTMLButtonElement>(null);
 	const {
 		register,
 		reset,
@@ -26,30 +26,10 @@ export default function CreateTaskModal() {
 	} = useForm({
 		resolver: zodResolver(taskSchema),
 	});
-
-	const { tasks, setTasks, addTask } = useTaskStore();
-	const [optimisticTasks, setOptimisticTasks] = useOptimistic(tasks);
-	const [isPending, startTransition] = useTransition();
-
-	const onSubmit = (data: TaskType) => {
-		startTransition(async () => {
-			setOptimisticTasks([...tasks, data]);
-			try {
-				const res = await fetch("http://localhost:3222", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					credentials: "include",
-					body: JSON.stringify(data),
-				});
-				const resData = await res.json();
-				if (!res.ok) {
-					console.error(resData.error);
-					throw new Error("Issue creating tasks");
-				}
-			} catch (error) {}
-		});
+	const handleFormSubmit = async (data: TaskType) => {
+		onSubmit(data);
+		reset();
 	};
-
 	return (
 		<DialogContent
 			aria-describedby="create-task-description"
@@ -65,7 +45,7 @@ export default function CreateTaskModal() {
 					<span className="sr-only">Close</span>
 				</DialogClose>
 			</DialogHeader>
-			<form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+			<form className="flex flex-col gap-4" onSubmit={handleSubmit(handleFormSubmit)}>
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="taskName" className="text-sm font-medium">
 						Task name
@@ -244,7 +224,7 @@ export default function CreateTaskModal() {
 					<DialogClose asChild>
 						<Button variant="outline">Cancel</Button>
 					</DialogClose>
-					<Button>Create</Button>
+					<Button disabled={isSubmitting}>{isSubmitting ? "Creating..." : "Create"}</Button>
 				</DialogFooter>
 			</form>
 		</DialogContent>

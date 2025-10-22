@@ -7,8 +7,8 @@ import SignUpClient from "./sign-up-client";
 export default function SignUp() {
 	return (
 		<main className="grid place-items-center min-h-screen px-6 xl:px-0 bg-white">
-			<div className="shadow-xl bg-accent rounded-2xl overflow-hidden my-20 border-2 border-accent">
-				<div className="w-full max-w-[500px] p-8 md:p-10 bg-white rounded-xl ring-2 ring-accent">
+			<div className="shadow-xl max-w-[500px] w-full bg-accent rounded-2xl overflow-hidden my-20 border-2 border-accent">
+				<div className="w-full  p-8 md:p-10 bg-white rounded-xl ring-2 ring-accent">
 					<span className="tracking-[-0.02em] text-[18px] font-bold text-center block">
 						SyncTask
 					</span>

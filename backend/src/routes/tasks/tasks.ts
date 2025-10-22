@@ -7,7 +7,7 @@ import { authSchema } from "../../../schemas/auth-schema";
 import { db } from "../../../tasks/lib/index";
 import { and, eq } from "drizzle-orm";
 import { middleware } from "./middleware";
-import { users } from "../../../tasks/lib/schema";
+import { tasks, users } from "../../../tasks/lib/schema";
 
 const router = Router();
 
@@ -63,9 +63,57 @@ router.post("/sign-in", async (req: Request, res: Response) => {
 	}
 });
 
-router.get("/", middleware, async (req: Request & { userId?: string }, res: Response) => {});
+router.get("/", middleware, async (req: Request & { userId?: string }, res: Response) => {
+	try {
+		const userTasks = db
+			.select()
+			.from(tasks)
+			.where(eq(tasks.userId, Number(req.userId)))
+			.all();
+		return res.status(200).json(userTasks || []);
+	} catch (error) {
+		console.error("Error fetching tasks:", error);
+		res.status(500).json({ error: "Failed to fetch tasks" });
+	}
+});
 
-router.post("/", middleware, async (req: Request & { userId?: string }, res: Response) => {});
+router.post("/", middleware, async (req: Request & { userId?: string }, res: Response) => {
+	const { taskName, taskDescription, taskStatus, taskPriority, taskStartDate, taskDueDate } =
+		req.body;
+	if (
+		!taskName ||
+		!taskDescription ||
+		!taskStatus ||
+		!taskPriority ||
+		!taskStartDate ||
+		!taskDueDate
+	) {
+		return res.status(400).json({ error: "All fields are required" });
+	}
+
+	try {
+		const newTask = db
+			.insert(tasks)
+			.values({
+				taskId: uuidv4(),
+				userId: Number(req.userId),
+				taskName,
+				taskDescription,
+				taskStatus,
+				taskPriority,
+				taskStartDate,
+				taskDueDate,
+			})
+			.returning()
+			.get();
+
+		console.log(newTask);
+		res.status(200).json(newTask);
+	} catch (err) {
+		console.log(err);
+		res.status(500).json({ error: "Failed to create task" });
+	}
+});
 
 router.delete(
 	"/:taskId",

@@ -24,6 +24,7 @@ export default function LoginClient() {
 	const [loginError, setLoginError] = useState("");
 
 	const onSubmit = async (data: FormData) => {
+		setLoginError("");
 		try {
 			const res = await fetch("http://localhost:3222/todos/login", {
 				method: "POST",
