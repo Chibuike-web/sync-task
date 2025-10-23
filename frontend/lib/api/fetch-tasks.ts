@@ -7,8 +7,6 @@ export async function fetchTasks() {
 	const res = await fetch("http://localhost:3222", {
 		method: "GET",
 		headers: { Cookie: cookieHeader },
-		cache: "no-store",
-		credentials: "include",
 	});
 
 	if (!res.ok) {

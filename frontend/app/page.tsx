@@ -1,16 +1,16 @@
 import { Suspense } from "react";
-import TasksClient from "./tasks-client";
-import { fetchTasks } from "@/lib/api/fetch-tasks";
-
-async function Tasks() {
-	const tasks = await fetchTasks();
-	return <TasksClient tasks={tasks} />;
-}
+import Tasks from "./tasks/tasks";
+import Header from "./header/header";
 
 export default function Home() {
 	return (
-		<Suspense fallback={<p>Loading tasks...</p>}>
-			<Tasks />
-		</Suspense>
+		<>
+			<Header />
+			<Suspense
+				fallback={<div className="min-h-screen grid place-items-center">Loading tasks...</div>}
+			>
+				<Tasks />
+			</Suspense>
+		</>
 	);
 }

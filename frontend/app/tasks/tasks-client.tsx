@@ -24,7 +24,6 @@ import CreateTaskModal from "@/components/create-task-modal";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { TaskType } from "@/lib/schemas/task-schema";
 import { useOptimistic, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { createTaskAction } from "@/actions/create-task-action";
 
@@ -45,7 +44,6 @@ function getPriorityColor(priority: string) {
 }
 
 export default function TasksClient({ tasks }: { tasks: TaskType[] }) {
-	const router = useRouter();
 	const [optimisticTasks, setOptimisticTasks] = useOptimistic(tasks);
 	const [isPending, startTransition] = useTransition();
 	const startedTasks = optimisticTasks.filter((t) => t.taskStatus === "started");
@@ -64,56 +62,38 @@ export default function TasksClient({ tasks }: { tasks: TaskType[] }) {
 		});
 	};
 	return (
-		<>
-			<header className="py-6 border-b border-sidebar-border">
-				<nav className="flex items-center justify-between max-w-[700px] mx-auto px-6 xl:px-0">
-					<h1 className="tracking-[-0.05em] text-[20px] font-bold">SyncTask</h1>
-					<div className="flex gap-6 items-center">
-						<div className="flex items-center gap-2">
-							<button className="p-2" type="button">
-								<Bell />
-							</button>
-							<button className="p-2" type="button">
-								<Search />
-							</button>
-						</div>
-						<button className="bg-foreground rounded-full size-10 text-white font-bold">CM</button>
-					</div>
-				</nav>
-			</header>
-			<main className="flex flex-col items-start gap-y-6 max-w-[700px] mx-auto mt-10 px-6 xl:px-0">
-				<Dialog>
-					<DialogTrigger
-						id="create-task-description"
-						className="text-[16px] flex gap-2 bg-foreground h-10 px-4 text-white items-center justify-center rounded-[10px]"
-					>
-						<Plus className="w-5 h-5" />
-						<span>Create Task</span>
-					</DialogTrigger>
-					<CreateTaskModal onSubmit={handleCreateTask} />
-				</Dialog>
-				<Tabs defaultValue="all" className="w-full">
-					<TabsList className="w-max">
-						<TabsTrigger value="all">All</TabsTrigger>
-						<TabsTrigger value="not started">Not Started</TabsTrigger>
-						<TabsTrigger value="started">Started</TabsTrigger>
-						<TabsTrigger value="completed">Completed</TabsTrigger>
-					</TabsList>
-					<TabsContent value="all">
-						<TaskItem tasks={optimisticTasks} />
-					</TabsContent>
-					<TabsContent value="started">
-						<TaskItem tasks={startedTasks} />
-					</TabsContent>
-					<TabsContent value="not started">
-						<TaskItem tasks={notStartedTasks} />
-					</TabsContent>
-					<TabsContent value="completed">
-						<TaskItem tasks={completedTasks} />
-					</TabsContent>
-				</Tabs>
-			</main>
-		</>
+		<main className="flex flex-col items-start gap-y-6 max-w-[700px] mx-auto mt-10 px-6 xl:px-0">
+			<Dialog>
+				<DialogTrigger
+					id="create-task-description"
+					className="text-[16px] flex gap-2 bg-foreground h-10 px-4 text-white items-center justify-center rounded-[10px]"
+				>
+					<Plus className="w-5 h-5" />
+					<span>Create Task</span>
+				</DialogTrigger>
+				<CreateTaskModal onSubmit={handleCreateTask} />
+			</Dialog>
+			<Tabs defaultValue="all" className="w-full">
+				<TabsList className="w-max">
+					<TabsTrigger value="all">All</TabsTrigger>
+					<TabsTrigger value="not started">Not Started</TabsTrigger>
+					<TabsTrigger value="started">Started</TabsTrigger>
+					<TabsTrigger value="completed">Completed</TabsTrigger>
+				</TabsList>
+				<TabsContent value="all">
+					<TaskItem tasks={optimisticTasks} />
+				</TabsContent>
+				<TabsContent value="started">
+					<TaskItem tasks={startedTasks} />
+				</TabsContent>
+				<TabsContent value="not started">
+					<TaskItem tasks={notStartedTasks} />
+				</TabsContent>
+				<TabsContent value="completed">
+					<TaskItem tasks={completedTasks} />
+				</TabsContent>
+			</Tabs>
+		</main>
 	);
 }
 
