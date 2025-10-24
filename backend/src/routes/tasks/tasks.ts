@@ -2,12 +2,12 @@ import { Request, Response, Router } from "express";
 import { JWT_SECRET } from "../../config";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
-import { SignJWT } from "jose";
 import { authSchema } from "../../../schemas/auth-schema";
 import { db } from "../../../tasks/lib/index";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { middleware } from "./middleware";
 import { tasks, users } from "../../../tasks/lib/schema";
+import { createSession } from "../lib/session";
 
 const router = Router();
 
@@ -50,10 +50,7 @@ router.post("/sign-in", async (req: Request, res: Response) => {
 		const isMatch = await bcrypt.compare(password, existingUser.password);
 		if (!isMatch) return res.status(401).json({ error: "Wrong password" });
 
-		const token = await new SignJWT({ userId: existingUser.id })
-			.setProtectedHeader({ alg: "HS256" })
-			.setExpirationTime("1h")
-			.sign(JWT_SECRET);
+		const token = await createSession(existingUser.id);
 
 		res.cookie("token_tasks", token, { httpOnly: true, secure: true, sameSite: "lax" });
 		res.json({ message: "Signed in successfully" });
@@ -63,7 +60,29 @@ router.post("/sign-in", async (req: Request, res: Response) => {
 	}
 });
 
-router.get("/", middleware, async (req: Request & { userId?: string }, res: Response) => {
+router.get("/user", middleware, async (req: Request & { userId?: string }, res: Response) => {
+	try {
+		const user = db
+			.select()
+			.from(users)
+			.where(eq(users.id, Number(req.userId)))
+			.get();
+		if (!user) {
+			res.clearCookie("token_tasks");
+			return res.status(404).json({ redirect: "/sign-up" });
+		}
+		return res.status(200).json({
+			name: `${user.firstName} ${user.lastName}`,
+			email: user.email,
+			id: user.id,
+		});
+	} catch (error) {
+		console.error("Error fetching user:", error);
+		res.status(500).json({ error: "Failed to fetch user" });
+	}
+});
+
+router.get("/tasks", middleware, async (req: Request & { userId?: string }, res: Response) => {
 	try {
 		const userTasks = db
 			.select()
@@ -77,7 +96,7 @@ router.get("/", middleware, async (req: Request & { userId?: string }, res: Resp
 	}
 });
 
-router.post("/", middleware, async (req: Request & { userId?: string }, res: Response) => {
+router.post("/tasks", middleware, async (req: Request & { userId?: string }, res: Response) => {
 	const { taskName, taskDescription, taskStatus, taskPriority, taskStartDate, taskDueDate } =
 		req.body;
 	if (

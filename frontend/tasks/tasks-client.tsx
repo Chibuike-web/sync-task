@@ -20,11 +20,11 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Bell, Plus, Search } from "lucide-react";
-import CreateTaskModal from "@/components/create-task-modal";
+import CreateTaskModal, { CreateTaskActionResponseType } from "@/components/create-task-modal";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { TaskType } from "@/lib/schemas/task-schema";
 import { useOptimistic, useTransition } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/cn";
 import { createTaskAction } from "@/actions/create-task-action";
 
 function getStatusColor(status: string) {
@@ -50,16 +50,20 @@ export default function TasksClient({ tasks }: { tasks: TaskType[] }) {
 	const notStartedTasks = optimisticTasks.filter((t) => t.taskStatus === "not started");
 	const completedTasks = optimisticTasks.filter((t) => t.taskStatus === "completed");
 
-	const handleCreateTask = (data: TaskType) => {
-		startTransition(async () => {
+	const handleCreateTask = async (data: TaskType): Promise<CreateTaskActionResponseType> => {
+		startTransition(() => {
 			const tempTask = { ...data, taskId: `temp-${Date.now()}` };
-			setOptimisticTasks([...tasks, tempTask]);
-			try {
-				await createTaskAction(data);
-			} catch (error) {
-				console.error(error);
-			}
+			setOptimisticTasks((prev) => [...prev, tempTask]);
 		});
+		try {
+			const resData = await createTaskAction(data);
+			console.log(resData);
+			return resData;
+		} catch (error) {
+			console.error(error);
+			startTransition(() => setOptimisticTasks(tasks));
+			return { status: "failed", error: "Something went wrong" };
+		}
 	};
 	return (
 		<main className="flex flex-col items-start gap-y-6 max-w-[700px] mx-auto mt-10 px-6 xl:px-0">

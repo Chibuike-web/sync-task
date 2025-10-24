@@ -1,13 +1,15 @@
 "use server";
 
+import { CreateTaskActionResponseType } from "@/components/create-task-modal";
+import { TaskType } from "@/lib/schemas/task-schema";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
-export async function createTaskAction(data: any) {
+export async function createTaskAction(data: TaskType): Promise<CreateTaskActionResponseType> {
 	const cookieStore = await cookies();
 	const cookieHeader = cookieStore.toString();
 
-	const res = await fetch("http://localhost:3222", {
+	const res = await fetch("http://localhost:3222/tasks", {
 		method: "POST",
 		headers: { "Content-Type": "application/json", Cookie: cookieHeader },
 		credentials: "include",
@@ -16,9 +18,9 @@ export async function createTaskAction(data: any) {
 	const resData = await res.json();
 
 	if (!res.ok) {
-		return { success: false, error: resData.error || "Failed to create task" };
+		return { status: "failed", error: resData.error || "Failed to create task" };
 	}
-	revalidatePath("/");
 
-	return { success: true, data: resData };
+	revalidatePath("/");
+	return { status: "success", data: resData };
 }

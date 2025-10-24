@@ -15,7 +15,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { taskSchema, TaskType } from "@/lib/schemas/task-schema";
 import { useRef } from "react";
 
-export default function CreateTaskModal({ onSubmit }: { onSubmit: (data: TaskType) => void }) {
+export type CreateTaskActionResponseType = {
+	status: "success" | "failed";
+	data?: any;
+	error?: string;
+};
+
+export default function CreateTaskModal({
+	onSubmit,
+}: {
+	onSubmit: (data: TaskType) => Promise<CreateTaskActionResponseType>;
+}) {
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
 	const {
 		register,
@@ -27,8 +37,11 @@ export default function CreateTaskModal({ onSubmit }: { onSubmit: (data: TaskTyp
 		resolver: zodResolver(taskSchema),
 	});
 	const handleFormSubmit = async (data: TaskType) => {
-		onSubmit(data);
-		reset();
+		const resData = await onSubmit(data);
+		if (resData?.status === "success") {
+			reset();
+			closeButtonRef.current?.click();
+		}
 	};
 	return (
 		<DialogContent
@@ -40,7 +53,7 @@ export default function CreateTaskModal({ onSubmit }: { onSubmit: (data: TaskTyp
 			</p>
 			<DialogHeader className="flex justify-between items-center">
 				<DialogTitle className="text-xl font-semibold text-left">Create Task</DialogTitle>
-				<DialogClose data-slot="dialog-close">
+				<DialogClose data-slot="dialog-close" ref={closeButtonRef}>
 					<X className="size-6" />
 					<span className="sr-only">Close</span>
 				</DialogClose>
@@ -201,8 +214,8 @@ export default function CreateTaskModal({ onSubmit }: { onSubmit: (data: TaskTyp
 							<Select onValueChange={field.onChange} value={field.value}>
 								<SelectTrigger
 									className="w-full text-[16px]"
-									aria-describedby={errors.taskStatus ? "task-priority-error" : undefined}
-									aria-invalid={!!errors.taskStatus}
+									aria-describedby={errors.taskPriority ? "task-priority-error" : undefined}
+									aria-invalid={!!errors.taskPriority}
 								>
 									<SelectValue placeholder="Low" />
 								</SelectTrigger>
