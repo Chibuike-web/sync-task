@@ -66,7 +66,12 @@ export default function SignUpClient() {
 					</button>
 				</div>
 			)}
-			<form onSubmit={handleSubmit(onSubmit)}>
+			<form
+				onSubmit={handleSubmit((data) => {
+					setSignUpError("");
+					onSubmit(data);
+				})}
+			>
 				<div className="flex gap-4 mb-6">
 					<div>
 						<Label htmlFor="email" className="mb-2 flex items-center justify-between">

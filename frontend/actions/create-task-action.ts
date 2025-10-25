@@ -1,6 +1,6 @@
 "use server";
 
-import { CreateTaskActionResponseType } from "@/components/create-task-modal";
+import { CreateTaskActionResponseType } from "@/tasks/components/create-task-modal";
 import { TaskType } from "@/lib/schemas/task-schema";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";

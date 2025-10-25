@@ -55,7 +55,12 @@ export default function SignInClient() {
 					</button>
 				</div>
 			)}
-			<form onSubmit={handleSubmit(onSubmit)}>
+			<form
+				onSubmit={handleSubmit((data) => {
+					setSignInError("");
+					onSubmit(data);
+				})}
+			>
 				<div className="mb-4">
 					<Label htmlFor="email" className="mb-2">
 						Email

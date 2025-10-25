@@ -1,19 +1,32 @@
 "use client";
 
-import { DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+	DialogClose,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { CalendarIcon, X } from "lucide-react";
-import { Calendar } from "./ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { taskSchema, TaskType } from "@/lib/schemas/task-schema";
 import { useRef } from "react";
+import { useTasksContext } from "@/tasks/contexts/tasks-context";
 
 export type CreateTaskActionResponseType = {
 	status: "success" | "failed";
@@ -21,12 +34,10 @@ export type CreateTaskActionResponseType = {
 	error?: string;
 };
 
-export default function CreateTaskModal({
-	onSubmit,
-}: {
-	onSubmit: (data: TaskType) => Promise<CreateTaskActionResponseType>;
-}) {
+export default function CreateTaskModal() {
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
+	const { handleCreateTask: onSubmit } = useTasksContext();
+
 	const {
 		register,
 		reset,
