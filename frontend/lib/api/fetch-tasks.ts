@@ -2,12 +2,13 @@ import { cookies } from "next/headers";
 
 export async function fetchTasks() {
 	const cookieStore = await cookies();
-	const cookieHeader = cookieStore.toString();
+	const token = cookieStore.get("token_tasks");
 
 	try {
 		const res = await fetch("http://localhost:3222/tasks", {
 			method: "GET",
-			headers: { Cookie: cookieHeader },
+			headers: { Cookie: `token_tasks=${token?.value}` },
+			cache: "force-cache",
 		});
 
 		if (res.status === 401 || res.status === 403) {
