@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { authSchema } from "../../../schemas/auth-schema";
 import { db } from "../../../tasks/lib/index";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { middleware } from "./middleware";
 import { tasks, users } from "../../../tasks/lib/schema";
 import { createSession } from "../lib/session";
@@ -126,7 +126,6 @@ router.post("/tasks", middleware, async (req: Request & { userId?: string }, res
 			.returning()
 			.get();
 
-		console.log(newTask);
 		res.status(200).json(newTask);
 	} catch (err) {
 		console.log(err);
@@ -134,11 +133,24 @@ router.post("/tasks", middleware, async (req: Request & { userId?: string }, res
 	}
 });
 
-router.delete(
-	"/:taskId",
-	middleware,
-	async (req: Request & { userId?: string }, res: Response) => {}
-);
+router.delete("/:taskId", middleware, async (req: Request & { userId?: string }, res: Response) => {
+	const taskId = req.params.taskId;
+	if (!taskId.trim()) return res.status(400).json({ error: "Task Id is required" });
+
+	try {
+		const deleted = await db
+			.delete(tasks)
+			.where(and(eq(tasks.userId, Number(req.userId)), eq(tasks.taskId, taskId)))
+			.returning();
+		if (deleted.length === 0) {
+			return res.status(404).json({ message: "Task not found" });
+		}
+		return res.status(200).json({ message: "Task deleted successfully", todo: deleted });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: "Failed to delete task" });
+	}
+});
 
 router.put("/:taskId", middleware, async (req: Request & { userId?: string }, res: Response) => {});
 

@@ -25,7 +25,11 @@ export async function middleware(
 		req.userId = userId.toString();
 		next();
 	} catch (error) {
-		console.error(error);
+		const err = error as { code?: string };
+		if (err.code === "ERR_JWT_EXPIRED") {
+			console.error("Session expired");
+			return res.status(401).json({ error: "Session expired" });
+		}
 		res.clearCookie("token_tasks");
 		return res.status(401).json({ error: "Invalid or expired token", redirect: "/sign-in" });
 	}
