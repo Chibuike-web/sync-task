@@ -8,17 +8,20 @@ export async function fetchTasks() {
 		const res = await fetch("http://localhost:3222/tasks", {
 			method: "GET",
 			headers: { Cookie: `token_tasks=${token?.value}` },
-			cache: "force-cache",
 		});
 
+		const resData = await res.json();
+
 		if (res.status === 401 || res.status === 403) {
+			if (resData?.error === "Session expired") {
+				return { status: "expired" };
+			}
 			return { status: "unauthorized" };
 		}
 		if (!res.ok) {
 			return { status: "failed", error: "Failed to fetch task" };
 		}
-		const data = await res.json();
-		return { status: "success", data: data || [] };
+		return { status: "success", data: resData || [] };
 	} catch (error) {
 		console.error(error);
 	}

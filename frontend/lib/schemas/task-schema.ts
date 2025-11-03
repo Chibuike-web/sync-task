@@ -8,6 +8,7 @@ export const taskSchema = z.object({
 	taskStartDate: z.string().min(1, "Task start date is required"),
 	taskDueDate: z.string().min(1, "Task due date is required"),
 	taskPriority: z.string().min(1, "Task priority is required"),
+	status: z.enum(["deleting", "editing"]).optional(),
 });
 
 export type TaskType = z.infer<typeof taskSchema>;

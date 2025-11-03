@@ -39,10 +39,14 @@ function getPriorityColor(priority: string) {
 }
 
 export default function TaskItem({ tasks }: { tasks: TaskType[] }) {
+	const { handleDeleteTask } = useTasksContext();
 	return (
 		<div className="flex flex-col gap-4">
 			{tasks.map((task) => (
-				<div key={task.taskId} className={cn("bg-white border rounded-xl p-4")}>
+				<div
+					key={task.taskId}
+					className={cn("bg-white border rounded-xl p-4", task.status && "opacity-50")}
+				>
 					<div className="w-full flex justify-between items-center">
 						<div className="flex items-center gap-3 flex-wrap">
 							<h3 className="font-semibold text-[clamp(14px,5vw,18px)] break-words leading-[1.2]">
@@ -109,7 +113,12 @@ export default function TaskItem({ tasks }: { tasks: TaskType[] }) {
 
 										<AlertDialogFooter>
 											<AlertDialogCancel>Cancel</AlertDialogCancel>
-											<AlertDialogAction variant="destructive">Delete</AlertDialogAction>
+											<AlertDialogAction
+												variant="destructive"
+												onClick={() => handleDeleteTask(task.taskId ?? "")}
+											>
+												Delete
+											</AlertDialogAction>
 										</AlertDialogFooter>
 									</AlertDialogContent>
 								</AlertDialog>

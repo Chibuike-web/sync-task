@@ -1,21 +1,28 @@
 "use server";
 
-import { CreateTaskActionResponseType } from "@/tasks/components/create-task-modal";
 import { TaskType } from "@/lib/schemas/task-schema";
+import { CreateTaskReturnType } from "@/tasks/types/create-task-response-type";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
-export async function createTaskAction(data: TaskType): Promise<CreateTaskActionResponseType> {
+export async function createTaskAction(data: TaskType): CreateTaskReturnType {
 	const cookieStore = await cookies();
-	const cookieHeader = cookieStore.toString();
+	const token = cookieStore.get("token_tasks");
 
+	console.log(token);
 	const res = await fetch("http://localhost:3222/tasks", {
 		method: "POST",
-		headers: { "Content-Type": "application/json", Cookie: cookieHeader },
-		credentials: "include",
+		headers: { "Content-Type": "application/json", Cookie: `token_tasks=${token?.value}` },
 		body: JSON.stringify(data),
 	});
 	const resData = await res.json();
+
+	if (res.status === 401 || res.status === 403) {
+		if (resData?.error === "Session expired") {
+			return { status: "expired" };
+		}
+		return { status: "unauthorized" };
+	}
 
 	if (!res.ok) {
 		return { status: "failed", error: resData.error || "Failed to create task" };

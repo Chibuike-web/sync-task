@@ -27,16 +27,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { taskSchema, TaskType } from "@/lib/schemas/task-schema";
 import { useRef } from "react";
 import { useTasksContext } from "@/tasks/contexts/tasks-context";
-
-export type CreateTaskActionResponseType = {
-	status: "success" | "failed";
-	data?: any;
-	error?: string;
-};
+import type { CreateTaskReturnType } from "../types/create-task-response-type";
+import { useRouter } from "next/navigation";
 
 export default function CreateTaskModal() {
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
 	const { handleCreateTask: onSubmit } = useTasksContext();
+	const router = useRouter();
 
 	const {
 		register,
@@ -47,12 +44,20 @@ export default function CreateTaskModal() {
 	} = useForm({
 		resolver: zodResolver(taskSchema),
 	});
-	const handleFormSubmit = async (data: TaskType) => {
+	const handleFormSubmit = async (data: TaskType): CreateTaskReturnType => {
+		console.log("click");
 		const resData = await onSubmit(data);
-		if (resData?.status === "success") {
+		if (resData.status === "expired" || resData.status === "unauthorized") {
+			router.replace("/sign-in");
+			router.refresh();
 			reset();
 			closeButtonRef.current?.click();
 		}
+		if (resData.status === "success") {
+			reset();
+			closeButtonRef.current?.click();
+		}
+		return resData;
 	};
 	return (
 		<DialogContent
@@ -77,6 +82,7 @@ export default function CreateTaskModal() {
 					<Input
 						id="taskName"
 						placeholder="Enter your name"
+						className="text-[1rem] placeholder:text-[1rem]"
 						{...register("taskName")}
 						aria-describedby={errors.taskName ? "task-name-error" : undefined}
 						aria-invalid={!!errors.taskName}
@@ -94,6 +100,7 @@ export default function CreateTaskModal() {
 					<Textarea
 						id="taskDescription"
 						placeholder="Enter description"
+						className="text-[1rem] placeholder:text-[1rem]"
 						{...register("taskDescription")}
 						aria-describedby={errors.taskDescription ? "task-description-error" : undefined}
 						aria-invalid={!!errors.taskDescription}

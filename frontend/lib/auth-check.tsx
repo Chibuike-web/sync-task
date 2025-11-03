@@ -4,7 +4,7 @@ import { fetchUser } from "./api/fetch-user";
 
 export default async function AuthCheck({ children }: { children: React.ReactNode }) {
 	const user = await fetchUser();
-	if (!user) redirect("/sign-up");
+	if (!user) redirect("/sign-in");
 
 	return <UserProvider user={user}>{children}</UserProvider>;
 }

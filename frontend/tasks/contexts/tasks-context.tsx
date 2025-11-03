@@ -4,7 +4,8 @@ import { createContext, startTransition, useContext, useOptimistic } from "react
 import type { TaskType } from "@/lib/schemas/task-schema";
 import { createTaskAction } from "@/actions/create-task-action";
 import type { TasksContextType } from "../types/tasks-context-type";
-import type { CreateTaskActionResponseType } from "../types/create-task-action-response-type";
+import { deleteTaskAction } from "@/actions/delete-task-action";
+import { CreateTaskReturnType } from "../types/create-task-response-type";
 
 const TasksContext = createContext<TasksContextType | null>(null);
 
@@ -25,7 +26,7 @@ export default function TasksProvider({
 }) {
 	const [optimisticTasks, setOptimisticTasks] = useOptimistic(initialTasks);
 
-	const handleCreateTask = async (data: TaskType): Promise<CreateTaskActionResponseType> => {
+	const handleCreateTask = async (data: TaskType): CreateTaskReturnType => {
 		startTransition(() => {
 			const tempTask = { ...data, taskId: `temp-${Date.now()}` };
 			setOptimisticTasks((prev) => [...prev, tempTask]);
@@ -42,8 +43,26 @@ export default function TasksProvider({
 		}
 	};
 
+	const handleDeleteTask = async (id: string) => {
+		startTransition(async () => {
+			setOptimisticTasks(
+				optimisticTasks.map((task) => (task.taskId === id ? { ...task, status: "deleting" } : task))
+			);
+		});
+		try {
+			const res = await deleteTaskAction(id);
+			if (res.status === "failed") {
+				console.log("failed");
+				return;
+			}
+		} catch (error) {
+			console.error(error);
+			startTransition(() => setOptimisticTasks(initialTasks));
+		}
+	};
+
 	return (
-		<TasksContext.Provider value={{ tasks: optimisticTasks, handleCreateTask }}>
+		<TasksContext.Provider value={{ tasks: optimisticTasks, handleCreateTask, handleDeleteTask }}>
 			{children}
 		</TasksContext.Provider>
 	);
