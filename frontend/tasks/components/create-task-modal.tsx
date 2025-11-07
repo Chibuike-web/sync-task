@@ -28,7 +28,7 @@ import { taskSchema, TaskType } from "@/lib/schemas/task-schema";
 import { useRef } from "react";
 import { useTasksContext } from "@/tasks/contexts/tasks-context";
 import type { CreateTaskReturnType } from "../types/create-task-response-type";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 export default function CreateTaskModal() {
 	const closeButtonRef = useRef<HTMLButtonElement>(null);

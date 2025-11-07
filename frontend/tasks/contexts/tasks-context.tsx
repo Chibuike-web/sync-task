@@ -6,6 +6,7 @@ import { createTaskAction } from "@/actions/create-task-action";
 import type { TasksContextType } from "../types/tasks-context-type";
 import { deleteTaskAction } from "@/actions/delete-task-action";
 import { CreateTaskReturnType } from "../types/create-task-response-type";
+import { useParams } from "next/navigation";
 
 const TasksContext = createContext<TasksContextType | null>(null);
 
@@ -25,6 +26,9 @@ export default function TasksProvider({
 	initialTasks: TaskType[];
 }) {
 	const [optimisticTasks, setOptimisticTasks] = useOptimistic(initialTasks);
+	const params = useParams();
+	const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId;
+	if (!userId) return null;
 
 	const handleCreateTask = async (data: TaskType): CreateTaskReturnType => {
 		startTransition(() => {
@@ -33,7 +37,7 @@ export default function TasksProvider({
 		});
 
 		try {
-			const resData = await createTaskAction(data);
+			const resData = await createTaskAction(data, userId);
 			console.log(resData);
 			return resData;
 		} catch (error) {

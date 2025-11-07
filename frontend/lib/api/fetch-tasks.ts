@@ -1,13 +1,19 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-export async function fetchTasks() {
+export async function fetchTasks(id?: string) {
+	if (!id) return redirect("/sign-in");
+
 	const cookieStore = await cookies();
-	const token = cookieStore.get("token_tasks");
+	const cookieName = `token_tasks_${id}`;
+
+	const cookie = cookieStore.get(cookieName);
+	if (!cookie) return redirect("/sign-in");
 
 	try {
 		const res = await fetch("http://localhost:3222/tasks", {
 			method: "GET",
-			headers: { Cookie: `token_tasks=${token?.value}` },
+			headers: { Cookie: `${cookieName}=${cookie.value}` },
 		});
 
 		const resData = await res.json();

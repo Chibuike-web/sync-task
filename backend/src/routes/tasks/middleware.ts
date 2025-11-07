@@ -10,27 +10,32 @@ export async function middleware(
 	next: NextFunction
 ) {
 	try {
-		const token = req.cookies.token_tasks;
-		if (!token) return res.status(401).json({ message: "No token" });
+		const cookieName = req.headers.cookie;
+		if (!cookieName) return res.status(401).json({ message: "No session found" });
+		console.log("middleware", cookieName);
+
+		const token = cookieName.split("=")[1];
+		console.log("middleware", token);
+
+		if (!token) return res.status(401).json({ message: "Invalid session" });
 
 		const payload = await verifySessionToken(token);
 		const userId = payload.userId as number;
 
 		const user = db.select().from(users).where(eq(users.id, userId)).get();
 		if (!user) {
-			res.clearCookie("token_tasks");
+			res.clearCookie(cookieName);
 			return res.status(404).json({ error: "User not found", redirect: "/sign-up" });
 		}
 
 		req.userId = userId.toString();
-		next();
+		return next();
 	} catch (error) {
 		const err = error as { code?: string };
 		if (err.code === "ERR_JWT_EXPIRED") {
 			console.error("Session expired");
 			return res.status(401).json({ error: "Session expired" });
 		}
-		res.clearCookie("token_tasks");
 		return res.status(401).json({ error: "Invalid or expired token", redirect: "/sign-in" });
 	}
 }

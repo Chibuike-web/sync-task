@@ -9,35 +9,35 @@
 		"lint": "tsc --noEmit",
 		"db:generate:todos": "drizzle-kit generate --config=drizzle.config.todos.ts",
 		"db:push:todos": "drizzle-kit push --config=drizzle.config.todos.ts",
-		"db:migrate:todos": "pnpm db:generate:todos && pnpm db:push:todos --config=drizzle.config.todos.ts",
+		"db:migrate:todos": "bun db:generate:todos && bun db:push:todos --config=drizzle.config.todos.ts",
 		"db:generate:tasks": "drizzle-kit generate --config=drizzle.config.tasks.ts",
 		"db:push:tasks": "drizzle-kit push --config=drizzle.config.tasks.ts",
-		"db:migrate:tasks": "pnpm db:generate:tasks && pnpm db:push:tasks --config=drizzle.config.tasks.ts"
+		"db:migrate:tasks": "bun db:generate:tasks && bun db:push:tasks --config=drizzle.config.tasks.ts"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
 		"bcrypt": "^6.0.0",
-		"better-sqlite3": "^12.2.0",
+		"better-sqlite3": "^12.4.1",
 		"cookie-parser": "^1.4.7",
 		"cors": "^2.8.5",
-		"dotenv": "^17.2.1",
-		"drizzle-kit": "^0.31.4",
-		"drizzle-orm": "^0.44.5",
+		"dotenv": "^17.2.3",
+		"drizzle-kit": "^0.31.6",
+		"drizzle-orm": "^0.44.7",
 		"express": "^5.1.0",
 		"jose": "^6.1.0",
-		"uuid": "^11.1.0",
-		"zod": "^4.1.5"
+		"uuid": "^13.0.0",
+		"zod": "^4.1.12"
 	},
 	"devDependencies": {
 		"@types/bcrypt": "^6.0.0",
 		"@types/better-sqlite3": "^7.6.13",
-		"@types/cookie-parser": "^1.4.9",
+		"@types/cookie-parser": "^1.4.10",
 		"@types/cors": "^2.8.19",
-		"@types/express": "^5.0.3",
-		"@types/node": "^24.3.0",
-		"tsx": "^4.20.5",
-		"typescript": "^5.9.2"
+		"@types/express": "^5.0.5",
+		"@types/node": "^24.10.0",
+		"tsx": "^4.20.6",
+		"typescript": "^5.9.3"
 	}
 }

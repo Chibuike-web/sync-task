@@ -52,8 +52,9 @@ router.post("/sign-in", async (req: Request, res: Response) => {
 
 		const token = await createSession(existingUser.id);
 
-		res.cookie("token_tasks", token, { httpOnly: true, secure: true, sameSite: "lax" });
-		res.json({ message: "Signed in successfully" });
+		const cookieName = `token_tasks_${existingUser.id}`;
+		res.cookie(cookieName, token, { httpOnly: true, secure: true, sameSite: "lax" });
+		res.json({ id: existingUser.id, message: "Signed in successfully" });
 	} catch (error) {
 		console.error("Sign in failed:", error);
 		return res.status(500).json({ error: "Internal server error" });
@@ -128,7 +129,7 @@ router.post("/tasks", middleware, async (req: Request & { userId?: string }, res
 
 		res.status(200).json(newTask);
 	} catch (err) {
-		console.log(err);
+		console.error(err);
 		res.status(500).json({ error: "Failed to create task" });
 	}
 });

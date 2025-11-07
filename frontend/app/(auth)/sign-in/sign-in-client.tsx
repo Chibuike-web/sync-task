@@ -38,7 +38,7 @@ export default function SignInClient() {
 			}
 
 			reset();
-			router.push("/");
+			router.push(`/${resData.id}`);
 		} catch (err) {
 			console.error("Issue authenticating user", err);
 			setSignInError("Something went wrong. Please try again.");
@@ -118,7 +118,7 @@ export default function SignInClient() {
 				</div>
 
 				<Button
-					className="w-full disabled:opacity-50"
+					className="w-full disabled:opacity-50 cursor-pointer"
 					type="submit"
 					disabled={isSubmitting}
 					aria-busy={isSubmitting}

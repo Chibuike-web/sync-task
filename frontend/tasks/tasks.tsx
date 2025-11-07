@@ -2,8 +2,16 @@ import TasksProvider from "@/tasks/contexts/tasks-context";
 import { fetchTasks } from "@/lib/api/fetch-tasks";
 import { redirect } from "next/navigation";
 
-export default async function Tasks({ children }: { children: React.ReactNode }) {
-	const response = await fetchTasks();
+export default async function Tasks({
+	children,
+	params,
+}: {
+	children: React.ReactNode;
+	params: { userId: string };
+}) {
+	const { userId } = await params;
+
+	const response = await fetchTasks(userId);
 
 	if (response?.status === "expired") {
 		redirect("/sign-in");
