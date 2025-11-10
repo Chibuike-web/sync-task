@@ -8,6 +8,13 @@
       "when": 1759923059996,
       "tag": "0000_swift_mandarin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1762780938058,
+      "tag": "0001_gray_yellow_claw",
+      "breakpoints": true
     }
   ]
 }

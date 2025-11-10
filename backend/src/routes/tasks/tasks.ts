@@ -1,5 +1,4 @@
 import { Request, Response, Router } from "express";
-import { JWT_SECRET } from "../../config";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import { authSchema } from "../../../schemas/auth-schema";
@@ -21,8 +20,10 @@ router.post("/sign-up", async (req: Request, res: Response) => {
 		if (existingUser) return res.status(409).json({ error: "User already exist. Log in instead" });
 
 		const hashedPassword = await bcrypt.hash(password, 10);
+		const userId = crypto.randomUUID();
 		db.insert(users)
 			.values({
+				id: userId,
 				firstName,
 				lastName,
 				email,
@@ -61,16 +62,18 @@ router.post("/sign-in", async (req: Request, res: Response) => {
 	}
 });
 
-router.get("/user", middleware, async (req: Request & { userId?: string }, res: Response) => {
+type AuthenticatedRequest = Request & {
+	userId?: string;
+};
+
+router.get("/user", middleware, async (req: AuthenticatedRequest, res: Response) => {
 	try {
-		const user = db
-			.select()
-			.from(users)
-			.where(eq(users.id, Number(req.userId)))
-			.get();
+		if (!req.userId) {
+			return res.status(401).json({ status: "failed", error: "No id available" });
+		}
+		const user = db.select().from(users).where(eq(users.id, req.userId)).get();
 		if (!user) {
-			res.clearCookie("token_tasks");
-			return res.status(404).json({ redirect: "/sign-up" });
+			return res.status(404).json({ status: "failed", error: "User does not exist" });
 		}
 		return res.status(200).json({
 			name: `${user.firstName} ${user.lastName}`,
@@ -83,13 +86,12 @@ router.get("/user", middleware, async (req: Request & { userId?: string }, res: 
 	}
 });
 
-router.get("/tasks", middleware, async (req: Request & { userId?: string }, res: Response) => {
+router.get("/tasks", middleware, async (req: AuthenticatedRequest, res: Response) => {
 	try {
-		const userTasks = db
-			.select()
-			.from(tasks)
-			.where(eq(tasks.userId, Number(req.userId)))
-			.all();
+		if (!req.userId) {
+			return res.status(401).json({ status: "failed", error: "No id available" });
+		}
+		const userTasks = db.select().from(tasks).where(eq(tasks.userId, req.userId)).all();
 		return res.status(200).json(userTasks || []);
 	} catch (error) {
 		console.error("Error fetching tasks:", error);
@@ -112,11 +114,14 @@ router.post("/tasks", middleware, async (req: Request & { userId?: string }, res
 	}
 
 	try {
+		if (!req.userId) {
+			return res.status(401).json({ status: "failed", error: "No id available" });
+		}
 		const newTask = db
 			.insert(tasks)
 			.values({
 				taskId: uuidv4(),
-				userId: Number(req.userId),
+				userId: req.userId,
 				taskName,
 				taskDescription,
 				taskStatus,
@@ -134,14 +139,17 @@ router.post("/tasks", middleware, async (req: Request & { userId?: string }, res
 	}
 });
 
-router.delete("/:taskId", middleware, async (req: Request & { userId?: string }, res: Response) => {
+router.delete("/:taskId", middleware, async (req: AuthenticatedRequest, res: Response) => {
 	const taskId = req.params.taskId;
 	if (!taskId.trim()) return res.status(400).json({ error: "Task Id is required" });
 
 	try {
+		if (!req.userId) {
+			return res.status(401).json({ status: "failed", error: "No id available" });
+		}
 		const deleted = await db
 			.delete(tasks)
-			.where(and(eq(tasks.userId, Number(req.userId)), eq(tasks.taskId, taskId)))
+			.where(and(eq(tasks.userId, req.userId), eq(tasks.taskId, taskId)))
 			.returning();
 		if (deleted.length === 0) {
 			return res.status(404).json({ message: "Task not found" });
@@ -153,6 +161,6 @@ router.delete("/:taskId", middleware, async (req: Request & { userId?: string },
 	}
 });
 
-router.put("/:taskId", middleware, async (req: Request & { userId?: string }, res: Response) => {});
+router.put("/:taskId", middleware, async (req: AuthenticatedRequest, res: Response) => {});
 
 export default router;

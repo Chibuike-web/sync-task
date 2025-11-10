@@ -12,15 +12,13 @@ export async function middleware(
 	try {
 		const cookieName = req.headers.cookie;
 		if (!cookieName) return res.status(401).json({ message: "No session found" });
-		console.log("middleware", cookieName);
 
 		const token = cookieName.split("=")[1];
-		console.log("middleware", token);
 
 		if (!token) return res.status(401).json({ message: "Invalid session" });
 
 		const payload = await verifySessionToken(token);
-		const userId = payload.userId as number;
+		const userId = payload.userId as string;
 
 		const user = db.select().from(users).where(eq(users.id, userId)).get();
 		if (!user) {
@@ -28,7 +26,7 @@ export async function middleware(
 			return res.status(404).json({ error: "User not found", redirect: "/sign-up" });
 		}
 
-		req.userId = userId.toString();
+		req.userId = userId;
 		return next();
 	} catch (error) {
 		const err = error as { code?: string };

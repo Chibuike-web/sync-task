@@ -1,7 +1,7 @@
-import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
+	id: text("id").primaryKey(),
 	firstName: text("first_name"),
 	lastName: text("last_name"),
 	email: text("email").notNull(),
@@ -10,7 +10,7 @@ export const users = sqliteTable("users", {
 
 export const tasks = sqliteTable("tasks", {
 	taskId: text("task_id").primaryKey(),
-	userId: integer("user_id")
+	userId: text("user_id")
 		.notNull()
 		.references(() => users.id, { onDelete: "cascade" }),
 	taskName: text("task_name").notNull(),
