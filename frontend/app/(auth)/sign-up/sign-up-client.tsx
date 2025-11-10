@@ -24,6 +24,7 @@ export default function SignUpClient() {
 	const { toggleVisibility, handleToggleVisibility } = useToggleVisibility();
 
 	const onSubmit = async (data: FormData) => {
+		setSignUpError("");
 		try {
 			const res = await fetch("http://localhost:3222/sign-up", {
 				method: "POST",
@@ -66,12 +67,7 @@ export default function SignUpClient() {
 					</button>
 				</div>
 			)}
-			<form
-				onSubmit={handleSubmit((data) => {
-					setSignUpError("");
-					onSubmit(data);
-				})}
-			>
+			<form onSubmit={handleSubmit(onSubmit)}>
 				<div className="flex gap-4 mb-6">
 					<div>
 						<Label htmlFor="email" className="mb-2 flex items-center justify-between">

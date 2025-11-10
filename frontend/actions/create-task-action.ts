@@ -6,11 +6,11 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function createTaskAction(data: TaskType, id: string): CreateTaskReturnType {
-	if (!id) return redirect("/sign-in");
+export async function createTaskAction(data: TaskType, userId: string): CreateTaskReturnType {
+	if (!userId) return redirect("/sign-in");
 
 	const cookieStore = await cookies();
-	const cookieName = `token_tasks_${id}`;
+	const cookieName = `token_tasks_${userId}`;
 
 	const cookie = cookieStore.get(cookieName);
 	if (!cookie) return redirect("/sign-in");

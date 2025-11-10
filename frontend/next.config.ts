@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	reactCompiler: false,
+	reactCompiler: true,
 	cacheComponents: true,
 	logging: {
 		fetches: {

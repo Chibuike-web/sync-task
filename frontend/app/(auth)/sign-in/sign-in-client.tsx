@@ -23,6 +23,7 @@ export default function SignInClient() {
 	const [signInError, setSignInError] = useState("");
 
 	const onSubmit = async (data: FormData) => {
+		setSignInError("");
 		try {
 			const res = await fetch("http://localhost:3222/sign-in", {
 				method: "POST",
@@ -55,12 +56,7 @@ export default function SignInClient() {
 					</button>
 				</div>
 			)}
-			<form
-				onSubmit={handleSubmit((data) => {
-					setSignInError("");
-					onSubmit(data);
-				})}
-			>
+			<form onSubmit={handleSubmit(onSubmit)}>
 				<div className="mb-4">
 					<Label htmlFor="email" className="mb-2">
 						Email

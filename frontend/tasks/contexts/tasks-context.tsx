@@ -47,14 +47,16 @@ export default function TasksProvider({
 		}
 	};
 
-	const handleDeleteTask = async (id: string) => {
+	const handleDeleteTask = async (taskId: string) => {
 		startTransition(async () => {
 			setOptimisticTasks(
-				optimisticTasks.map((task) => (task.taskId === id ? { ...task, status: "deleting" } : task))
+				optimisticTasks.map((task) =>
+					task.taskId === taskId ? { ...task, status: "deleting" } : task
+				)
 			);
 		});
 		try {
-			const res = await deleteTaskAction(id);
+			const res = await deleteTaskAction(userId, taskId);
 			if (res.status === "failed") {
 				console.log("failed");
 				return;

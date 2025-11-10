@@ -4,13 +4,17 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function deleteTaskAction(id: string) {
+export async function deleteTaskAction(userId: string, taskId: string) {
+	if (!userId) return redirect("/sign-in");
 	const cookieStore = await cookies();
-	const token = cookieStore.get("token_tasks");
+	const cookieName = `token_tasks_${userId}`;
 
-	const res = await fetch(`http://localhost:3222/${id}`, {
+	const cookie = cookieStore.get(cookieName);
+	if (!cookie) return redirect("/sign-in");
+
+	const res = await fetch(`http://localhost:3222/${taskId}`, {
 		method: "DELETE",
-		headers: { "Content-Type": "application/json", Cookie: `token_tasks=${token?.value}` },
+		headers: { "Content-Type": "application/json", Cookie: `token_tasks=${cookie.value}` },
 	});
 	const resData = await res.json();
 	if (res.status === 401 || res.status === 403) {
