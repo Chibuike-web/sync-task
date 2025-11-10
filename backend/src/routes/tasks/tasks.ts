@@ -68,9 +68,8 @@ type AuthenticatedRequest = Request & {
 
 router.get("/user", middleware, async (req: AuthenticatedRequest, res: Response) => {
 	try {
-		if (!req.userId) {
-			return res.status(401).json({ status: "failed", error: "No id available" });
-		}
+		if (!req.userId) return res.status(401).json({ status: "failed", error: "No id available" });
+
 		const user = db.select().from(users).where(eq(users.id, req.userId)).get();
 		if (!user) {
 			return res.status(404).json({ status: "failed", error: "User does not exist" });
@@ -82,15 +81,14 @@ router.get("/user", middleware, async (req: AuthenticatedRequest, res: Response)
 		});
 	} catch (error) {
 		console.error("Error fetching user:", error);
-		res.status(500).json({ error: "Failed to fetch user" });
+		res.status(500).json({ status: "failed", error: "Failed to fetch user" });
 	}
 });
 
 router.get("/tasks", middleware, async (req: AuthenticatedRequest, res: Response) => {
 	try {
-		if (!req.userId) {
-			return res.status(401).json({ status: "failed", error: "No id available" });
-		}
+		if (!req.userId) return res.status(401).json({ status: "failed", error: "No id available" });
+
 		const userTasks = db.select().from(tasks).where(eq(tasks.userId, req.userId)).all();
 		return res.status(200).json(userTasks || []);
 	} catch (error) {
@@ -99,7 +97,7 @@ router.get("/tasks", middleware, async (req: AuthenticatedRequest, res: Response
 	}
 });
 
-router.post("/tasks", middleware, async (req: Request & { userId?: string }, res: Response) => {
+router.post("/tasks", middleware, async (req: AuthenticatedRequest, res: Response) => {
 	const { taskName, taskDescription, taskStatus, taskPriority, taskStartDate, taskDueDate } =
 		req.body;
 	if (
