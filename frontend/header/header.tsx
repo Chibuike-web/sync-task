@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import Notification from "./components/notification";
 import SearchBar from "./components/search-bar";
 import Profile from "./components/profile";

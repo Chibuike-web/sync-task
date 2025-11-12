@@ -13,6 +13,8 @@ export const fetchUser = async (id?: string) => {
 	const res = await fetch("http://localhost:3222/user", {
 		method: "GET",
 		headers: { Cookie: `${cookieName}=${cookie.value}` },
+		cache: "force-cache",
+		next: { revalidate: 3600 },
 	});
 
 	if (!res.ok) return null;

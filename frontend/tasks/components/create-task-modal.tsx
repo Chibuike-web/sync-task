@@ -62,7 +62,7 @@ export default function CreateTaskModal() {
 	return (
 		<DialogContent
 			aria-describedby="create-task-description"
-			className="rounded-[16px] flex flex-col gap-6"
+			className="rounded-2xl flex flex-col gap-6"
 		>
 			<p id="create-task-description" className="sr-only">
 				Use this form to create a new task with name, description, dates, and priority.
