@@ -18,7 +18,7 @@ export default function SignIn() {
 						</h1>
 						<p className="text-sm text-gray-500 mb-6">Welcome back! Please sign in to continue </p>
 					</div>
-					<div className="flex w-full gap-4">
+					<div className="flex flex-col w-full gap-4 sm:flex-row">
 						<Button variant="outline" className="flex-1 font-medium flex gap-2 items-center">
 							<span>
 								<GoogleIcon />
@@ -34,9 +34,9 @@ export default function SignIn() {
 						</Button>
 					</div>
 					<div className="flex gap-4 items-center my-6">
-						<span className="inline-block h-[1px] w-full bg-foreground/10" />
+						<span className="inline-block h-px w-full bg-foreground/10" />
 						<span>or</span>
-						<span className="inline-block h-[1px] w-full bg-foreground/10" />
+						<span className="inline-block h-px w-full bg-foreground/10" />
 					</div>
 					<SignInClient />
 				</div>

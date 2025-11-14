@@ -8,9 +8,12 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUserContext } from "@/tasks/contexts/user-context";
+import { useTransition } from "react";
 
 export default function Profile() {
 	const user = useUserContext();
+	const [pending, startTransition] = useTransition();
+
 	return (
 		<>
 			<DropdownMenu>
@@ -30,7 +33,23 @@ export default function Profile() {
 					<DropdownMenuSeparator />
 					<DropdownMenuItem className="flex flex-col items-start">View Profile</DropdownMenuItem>
 					<DropdownMenuItem className="flex flex-col items-start">Settings</DropdownMenuItem>
-					<DropdownMenuItem className="flex flex-col items-start"> Log Out</DropdownMenuItem>
+					<DropdownMenuItem
+						disabled={pending}
+						className="flex flex-col items-start"
+						onClick={() => {
+							startTransition(async () => {
+								await fetch("http://localhost:3222/logout", {
+									method: "POST",
+									credentials: "include",
+									headers: { "Content-Type": "application/json" },
+									body: JSON.stringify({ id: user.id }),
+								});
+								window.location.href = "/sign-in";
+							});
+						}}
+					>
+						{pending ? "Logging out..." : "Log Out"}
+					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
 		</>

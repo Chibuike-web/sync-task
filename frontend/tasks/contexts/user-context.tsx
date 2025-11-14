@@ -1,7 +1,9 @@
 "use client";
+
 import { createContext, ReactNode, useContext } from "react";
 
 export type UserType = {
+	id: string;
 	name: string;
 	email: string;
 };

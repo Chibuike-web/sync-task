@@ -62,6 +62,13 @@ router.post("/sign-in", async (req: Request, res: Response) => {
 	}
 });
 
+router.post("/logout", (req, res) => {
+	const { id } = req.body;
+
+	res.clearCookie(`token_tasks_${id}`, { httpOnly: true, sameSite: "lax", path: "/" });
+
+	res.json({ status: "success" });
+});
 type AuthenticatedRequest = Request & {
 	userId?: string;
 };
