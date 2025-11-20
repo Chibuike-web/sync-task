@@ -7,7 +7,7 @@ import tasksRouter from "./routes/tasks/tasks";
 const app = express();
 app.use(
 	cors({
-		origin: "http://localhost:4030",
+		origin: ["http://localhost:4030", "http://localhost:3000"],
 		credentials: true,
 	})
 );

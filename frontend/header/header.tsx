@@ -12,7 +12,6 @@ export default function Header() {
 						<SearchBar />
 						<Notification />
 					</div>
-
 					<Profile />
 				</div>
 			</nav>

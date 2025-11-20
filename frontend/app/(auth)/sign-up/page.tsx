@@ -36,9 +36,9 @@ export default function SignUp() {
 						</Button>
 					</div>
 					<div className="flex gap-4 items-center my-6">
-						<span className="inline-block h-[1px] w-full bg-foreground/10" />
+						<span className="inline-block h-px w-full bg-foreground/10" />
 						<span>or</span>
-						<span className="inline-block h-[1px] w-full bg-foreground/10" />
+						<span className="inline-block h-px w-full bg-foreground/10" />
 					</div>
 					<SignUpClient />
 				</div>

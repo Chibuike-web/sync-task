@@ -38,12 +38,16 @@ export default function Profile() {
 						className="flex flex-col items-start"
 						onClick={() => {
 							startTransition(async () => {
-								await fetch("http://localhost:3222/logout", {
-									method: "POST",
-									credentials: "include",
-									headers: { "Content-Type": "application/json" },
-									body: JSON.stringify({ id: user.id }),
-								});
+								try {
+									await fetch("http://localhost:3222/logout", {
+										method: "POST",
+										credentials: "include",
+										headers: { "Content-Type": "application/json" },
+										body: JSON.stringify({ id: user.id }),
+									});
+								} catch (error) {
+									console.error(error);
+								}
 								window.location.href = "/sign-in";
 							});
 						}}

@@ -23,9 +23,9 @@ export default function TasksProvider({
 	initialTasks,
 }: {
 	children: React.ReactNode;
-	initialTasks: TaskType[];
+	initialTasks?: TaskType[];
 }) {
-	const [optimisticTasks, setOptimisticTasks] = useOptimistic(initialTasks);
+	const [optimisticTasks, setOptimisticTasks] = useOptimistic(initialTasks || []);
 	const params = useParams();
 	const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId;
 	if (!userId) return null;
@@ -33,7 +33,7 @@ export default function TasksProvider({
 	const handleCreateTask = async (data: TaskType): CreateTaskReturnType => {
 		startTransition(() => {
 			const tempTask = { ...data, taskId: `temp-${Date.now()}` };
-			setOptimisticTasks((prev) => [...prev, tempTask]);
+			setOptimisticTasks((prev) => [...(prev || []), tempTask]);
 		});
 
 		try {
@@ -42,7 +42,7 @@ export default function TasksProvider({
 			return resData;
 		} catch (error) {
 			console.error(error);
-			startTransition(() => setOptimisticTasks(initialTasks));
+			startTransition(() => setOptimisticTasks(initialTasks || []));
 			return { status: "failed", error: "Something went wrong" };
 		}
 	};
@@ -54,17 +54,16 @@ export default function TasksProvider({
 					task.taskId === taskId ? { ...task, status: "deleting" } : task
 				)
 			);
-		});
-		try {
-			const res = await deleteTaskAction(userId, taskId);
-			if (res.status === "failed") {
-				console.log("failed");
-				return;
+			try {
+				const res = await deleteTaskAction(userId, taskId);
+				if (res.status === "failed") {
+					console.log("failed");
+					return;
+				}
+			} catch (error) {
+				console.error(error);
 			}
-		} catch (error) {
-			console.error(error);
-			startTransition(() => setOptimisticTasks(initialTasks));
-		}
+		});
 	};
 
 	return (
