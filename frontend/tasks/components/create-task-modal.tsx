@@ -25,14 +25,14 @@ import { Button } from "@/components/ui/button";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { taskSchema, TaskType } from "@/lib/schemas/task-schema";
-import { useRef } from "react";
+import { startTransition, useRef } from "react";
 import { useTasksContext } from "@/tasks/contexts/tasks-context";
-import type { CreateTaskReturnType } from "../types/create-task-response-type";
 import { useParams, useRouter } from "next/navigation";
+import { createTaskAction } from "@/actions/create-task-action";
 
 export default function CreateTaskModal() {
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
-	const { handleCreateTask: onSubmit } = useTasksContext();
+	const { tasks, setTasks } = useTasksContext();
 	const router = useRouter();
 
 	const {
@@ -43,21 +43,40 @@ export default function CreateTaskModal() {
 		formState: { errors, isSubmitting },
 	} = useForm({
 		resolver: zodResolver(taskSchema),
+		defaultValues: {
+			taskStatus: "",
+			taskPriority: "",
+			taskStartDate: "",
+			taskDueDate: "",
+			taskName: "",
+			taskDescription: "",
+		},
 	});
-	const handleFormSubmit = async (data: TaskType): CreateTaskReturnType => {
-		console.log("click");
-		const resData = await onSubmit(data);
-		if (resData.status === "expired" || resData.status === "unauthorized") {
-			router.replace("/sign-in");
-			router.refresh();
-			reset();
+
+	const params = useParams();
+	const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId;
+	if (!userId) return null;
+
+	const handleCreateTask = async (data: TaskType) => {
+		startTransition(() => {
+			const tempTask = { ...data, taskId: `temp-${Date.now()}` };
+			setTasks([...tasks, tempTask]);
+		});
+		try {
+			const resData = await createTaskAction(data, userId);
+			if (resData.status === "expired" || resData.status === "unauthorized") {
+				router.replace("/sign-in");
+				router.refresh();
+				closeButtonRef.current?.click();
+				reset();
+			}
+
 			closeButtonRef.current?.click();
-		}
-		if (resData.status === "success") {
 			reset();
-			closeButtonRef.current?.click();
+		} catch (error) {
+			startTransition(() => setTasks(tasks || []));
+			console.error(error);
 		}
-		return resData;
 	};
 	return (
 		<DialogContent
@@ -74,7 +93,7 @@ export default function CreateTaskModal() {
 					<span className="sr-only">Close</span>
 				</DialogClose>
 			</DialogHeader>
-			<form className="flex flex-col gap-4" onSubmit={handleSubmit(handleFormSubmit)}>
+			<form className="flex flex-col gap-4" onSubmit={handleSubmit(handleCreateTask)}>
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="taskName" className="text-sm font-medium">
 						Task name
@@ -118,7 +137,6 @@ export default function CreateTaskModal() {
 					<Controller
 						name="taskStatus"
 						control={control}
-						defaultValue=""
 						render={({ field }) => (
 							<Select onValueChange={field.onChange} value={field.value}>
 								<SelectTrigger
@@ -149,7 +167,6 @@ export default function CreateTaskModal() {
 						</Label>
 						<Controller
 							name="taskStartDate"
-							defaultValue=""
 							control={control}
 							render={({ field }) => (
 								<Popover>
@@ -187,7 +204,6 @@ export default function CreateTaskModal() {
 						</Label>
 						<Controller
 							name="taskDueDate"
-							defaultValue=""
 							control={control}
 							render={({ field }) => (
 								<Popover>
@@ -227,7 +243,6 @@ export default function CreateTaskModal() {
 					<Controller
 						name="taskPriority"
 						control={control}
-						defaultValue=""
 						render={({ field }) => (
 							<Select onValueChange={field.onChange} value={field.value}>
 								<SelectTrigger

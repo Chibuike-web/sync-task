@@ -21,6 +21,10 @@ import {
 import { TaskType } from "@/lib/schemas/task-schema";
 import { cn } from "@/lib/utils/cn";
 import { useTasksContext } from "./contexts/tasks-context";
+import { startTransition } from "react";
+import { deleteTaskAction } from "@/actions/delete-task-action";
+import { useParams } from "next/navigation";
+import { editTaskAction } from "@/actions/edit-task-action";
 
 function getStatusColor(status: string) {
 	return cn({
@@ -39,7 +43,27 @@ function getPriorityColor(priority: string) {
 }
 
 export default function TaskItem({ tasks }: { tasks: TaskType[] }) {
-	const { handleDeleteTask } = useTasksContext();
+	const { setTasks } = useTasksContext();
+	const params = useParams<{ userId: string }>();
+	const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId;
+	if (!userId) return null;
+
+	const handleDeleteTask = async (taskId: string) => {
+		startTransition(async () => {
+			setTasks(
+				tasks.map((task) => (task.taskId === taskId ? { ...task, status: "deleting" } : task))
+			);
+			try {
+				const res = await deleteTaskAction(userId, taskId);
+				if (res.status === "failed") {
+					console.log("failed");
+					return;
+				}
+			} catch (error) {
+				console.error(error);
+			}
+		});
+	};
 	return (
 		<div className="flex flex-col gap-4">
 			{tasks.map((task) => (
@@ -84,7 +108,14 @@ export default function TaskItem({ tasks }: { tasks: TaskType[] }) {
 								</button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end" className="w-max rounded-[12px]">
-								<DropdownMenuItem className="px-4 py-2">Mark as Completed</DropdownMenuItem>
+								<DropdownMenuItem
+									className="px-4 py-2"
+									onClick={() => {
+										editTaskAction(userId, task.taskId ?? "", "completed");
+									}}
+								>
+									Mark as Completed
+								</DropdownMenuItem>
 								<DropdownMenuItem className="px-4 py-2">Edit Task</DropdownMenuItem>
 								<AlertDialog>
 									<AlertDialogTrigger asChild>
@@ -98,7 +129,7 @@ export default function TaskItem({ tasks }: { tasks: TaskType[] }) {
 										</DropdownMenuItem>
 									</AlertDialogTrigger>
 									<AlertDialogContent>
-										<AlertDialogHeader className="flex justify-between w-full">
+										<AlertDialogHeader className="flex justify-between w-full items-center">
 											<AlertDialogTitle>Delete Task</AlertDialogTitle>
 											<AlertDialogCancel
 												variant="ghost"

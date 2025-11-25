@@ -2,7 +2,7 @@
 
 import { TaskType } from "@/lib/schemas/task-schema";
 import { CreateTaskReturnType } from "@/tasks/types/create-task-response-type";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -33,6 +33,6 @@ export async function createTaskAction(data: TaskType, userId: string): CreateTa
 		return { status: "failed", error: resData.error || "Failed to create task" };
 	}
 
-	revalidatePath("/");
+	updateTag("tasks");
 	return { status: "success", data: resData };
 }

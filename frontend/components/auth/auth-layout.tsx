@@ -1,6 +1,6 @@
 import UserProvider from "@/tasks/contexts/user-context";
 import { redirect } from "next/navigation";
-import { fetchUser } from "./api/fetch-user";
+import { fetchUser } from "../../lib/api/fetch-user";
 import { Suspense } from "react";
 
 export default async function RootLayout({

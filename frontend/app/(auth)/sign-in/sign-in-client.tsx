@@ -37,9 +37,8 @@ export default function SignInClient() {
 				setSignInError(resData.error);
 				return;
 			}
-
-			reset();
 			router.push(`/${resData.id}`);
+			reset();
 		} catch (err) {
 			console.error("Issue authenticating user", err);
 			setSignInError("Something went wrong. Please try again.");

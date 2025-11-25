@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -14,7 +14,7 @@ export async function deleteTaskAction(userId: string, taskId: string) {
 
 	const res = await fetch(`http://localhost:3222/${taskId}`, {
 		method: "DELETE",
-		headers: { "Content-Type": "application/json", Cookie: `token_tasks=${cookie.value}` },
+		headers: { "Content-Type": "application/json", Cookie: `${cookieName}=${cookie.value}` },
 	});
 	const resData = await res.json();
 	if (res.status === 401 || res.status === 403) {
@@ -25,6 +25,6 @@ export async function deleteTaskAction(userId: string, taskId: string) {
 		return { status: "failed", error: resData.error || "Failed to create task" };
 	}
 
-	revalidatePath("/");
+	updateTag("tasks");
 	return { status: "success", data: resData };
 }

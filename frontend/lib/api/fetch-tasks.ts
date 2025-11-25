@@ -1,3 +1,4 @@
+import { cacheTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -10,25 +11,32 @@ export async function fetchTasks(id?: string) {
 	const cookie = cookieStore.get(cookieName);
 	if (!cookie) return redirect("/sign-in");
 
-	try {
-		const res = await fetch("http://localhost:3222/tasks", {
-			method: "GET",
-			headers: { Cookie: `${cookieName}=${cookie.value}` },
-		});
+	return cachedFetchTasks(cookieName, cookie.value);
+}
 
-		const resData = await res.json();
+async function cachedFetchTasks(cookieName: string, cookieValue: string) {
+	"use cache";
+	cacheTag("tasks");
+	const res = await fetch("http://localhost:3222/tasks", {
+		method: "GET",
+		headers: { Cookie: `${cookieName}=${cookieValue}` },
+	});
 
-		if (res.status === 401 || res.status === 403) {
-			if (resData?.error === "Session expired") {
-				return { status: "expired" };
-			}
-			return { status: "unauthorized" };
+	const resData = await res.json();
+
+	if (res.status === 401 || res.status === 403) {
+		if (resData?.error === "Session expired") {
+			return { status: "expired" };
 		}
-		if (!res.ok) {
-			return { status: "failed", error: "Failed to fetch task" };
-		}
-		return { status: "success", data: resData || [] };
-	} catch (error) {
-		console.error(error);
+		return { status: "unauthorized" };
 	}
+
+	if (!res.ok) {
+		return { status: "failed", error: "Failed to fetch task" };
+	}
+
+	return {
+		status: "success",
+		data: resData || [],
+	};
 }

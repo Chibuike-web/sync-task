@@ -49,8 +49,8 @@ export default function SignUpClient() {
 				}
 				return;
 			}
-			reset();
 			router.push("/sign-in");
+			reset();
 		} catch (err) {
 			console.error("Issue registering user:", err);
 			setSignUpError("Something went wrong. Please try again.");

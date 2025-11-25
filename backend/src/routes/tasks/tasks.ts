@@ -33,8 +33,10 @@ router.post("/sign-up", async (req: Request, res: Response) => {
 
 		return res.status(200).json({ message: "User successfully registered" });
 	} catch (error) {
-		console.error("Sign up error:", error);
-		res.status(500).json({ success: false, error: "Internal server error" });
+		res.status(500).json({
+			status: "failed",
+			error: error instanceof Error ? error.message : "Internal server error",
+		});
 	}
 });
 
@@ -57,12 +59,14 @@ router.post("/sign-in", async (req: Request, res: Response) => {
 		res.cookie(cookieName, token, { httpOnly: true, secure: true, sameSite: "lax" });
 		res.json({ id: existingUser.id, message: "Signed in successfully" });
 	} catch (error) {
-		console.error("Sign in failed:", error);
-		return res.status(500).json({ error: "Internal server error" });
+		res.status(500).json({
+			status: "failed",
+			error: error instanceof Error ? error.message : "Internal server error",
+		});
 	}
 });
 
-router.post("/logout", (req, res) => {
+router.post("/log-out", (req, res) => {
 	const { id } = req.body;
 
 	res.clearCookie(`token_tasks_${id}`, { httpOnly: true, sameSite: "lax", path: "/" });
@@ -87,8 +91,10 @@ router.get("/user", middleware, async (req: AuthenticatedRequest, res: Response)
 			id: user.id,
 		});
 	} catch (error) {
-		console.error("Error fetching user:", error);
-		res.status(500).json({ status: "failed", error: "Failed to fetch user" });
+		res.status(500).json({
+			status: "failed",
+			error: error instanceof Error ? error.message : "Internal server error",
+		});
 	}
 });
 
@@ -99,8 +105,10 @@ router.get("/tasks", middleware, async (req: AuthenticatedRequest, res: Response
 		const userTasks = db.select().from(tasks).where(eq(tasks.userId, req.userId)).all();
 		return res.status(200).json(userTasks || []);
 	} catch (error) {
-		console.error("Error fetching tasks:", error);
-		res.status(500).json({ error: "Failed to fetch tasks" });
+		res.status(500).json({
+			status: "failed",
+			error: error instanceof Error ? error.message : "Internal server error",
+		});
 	}
 });
 
@@ -138,16 +146,17 @@ router.post("/tasks", middleware, async (req: AuthenticatedRequest, res: Respons
 			.get();
 
 		res.status(200).json(newTask);
-	} catch (err) {
-		console.error(err);
-		res.status(500).json({ error: "Failed to create task" });
+	} catch (error) {
+		res.status(500).json({
+			status: "failed",
+			error: error instanceof Error ? error.message : "Internal server error",
+		});
 	}
 });
 
 router.delete("/:taskId", middleware, async (req: AuthenticatedRequest, res: Response) => {
 	const taskId = req.params.taskId;
 	if (!taskId.trim()) return res.status(400).json({ error: "Task Id is required" });
-
 	try {
 		if (!req.userId) {
 			return res.status(401).json({ status: "failed", error: "No id available" });
@@ -161,11 +170,55 @@ router.delete("/:taskId", middleware, async (req: AuthenticatedRequest, res: Res
 		}
 		return res.status(200).json({ message: "Task deleted successfully", todo: deleted });
 	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: "Failed to delete task" });
+		res.status(500).json({
+			status: "failed",
+			error: error instanceof Error ? error.message : "Internal server error",
+		});
 	}
 });
 
-router.put("/:taskId", middleware, async (req: AuthenticatedRequest, res: Response) => {});
+router.put("/:taskId", middleware, async (req: AuthenticatedRequest, res: Response) => {
+	const { taskId } = req.params;
+	if (!taskId) return res.status(400).json({ message: "Id is missing" });
+	try {
+		if (!req.userId) {
+			return res.status(401).json({ status: "failed", error: "No id available" });
+		}
+
+		const { data, completed } = req.body;
+
+		const updateData: Record<string, string> = {};
+
+		if (data) {
+			const { taskName, taskDescription, taskStatus, taskPriority, taskStartDate, taskDueDate } =
+				data;
+			if (taskName !== undefined) updateData.taskName = taskName;
+			if (taskDescription !== undefined) updateData.taskDescription = taskDescription;
+			if (taskStatus !== undefined) updateData.taskStatus = taskStatus;
+			if (taskPriority !== undefined) updateData.taskPriority = taskPriority;
+			if (taskStartDate !== undefined) updateData.taskStartDate = taskStartDate;
+			if (taskDueDate !== undefined) updateData.taskDueDate = taskDueDate;
+		}
+		if (completed) {
+			updateData.taskStatus = completed;
+		}
+
+		if (Object.keys(updateData).length === 0)
+			return res.status(400).json({ error: "No valid fields to update" });
+		const updated = await db
+			.update(tasks)
+			.set(updateData)
+			.where(and(eq(tasks.userId, req.userId), eq(tasks.taskId, taskId)))
+			.returning();
+		if (updated.length === 0) return res.status(404).json({ message: "Task not found" });
+
+		return res.status(200).json({ message: "Task updated successfully", todo: updated });
+	} catch (error) {
+		res.status(500).json({
+			status: "failed",
+			error: error instanceof Error ? error.message : "Internal server error",
+		});
+	}
+});
 
 export default router;

@@ -39,7 +39,7 @@ export default function Profile() {
 						onClick={() => {
 							startTransition(async () => {
 								try {
-									await fetch("http://localhost:3222/logout", {
+									await fetch("http://localhost:3222/log-out", {
 										method: "POST",
 										credentials: "include",
 										headers: { "Content-Type": "application/json" },

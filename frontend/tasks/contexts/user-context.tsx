@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, use } from "react";
 
 export type UserType = {
 	id: string;
@@ -11,7 +11,7 @@ export type UserType = {
 const UserContext = createContext<UserType | null>(null);
 
 export function useUserContext() {
-	const context = useContext(UserContext);
+	const context = use(UserContext);
 	if (!context) {
 		throw new Error("useTasksContext must be used within UserProvider");
 	}
