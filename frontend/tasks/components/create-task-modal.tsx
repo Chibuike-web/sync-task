@@ -25,13 +25,15 @@ import { Button } from "@/components/ui/button";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { taskSchema, TaskType } from "@/lib/schemas/task-schema";
-import { startTransition, useRef } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useTasksContext } from "@/tasks/contexts/tasks-context";
 import { useParams, useRouter } from "next/navigation";
 import { createTaskAction } from "@/actions/create-task-action";
 
 export default function CreateTaskModal() {
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
+	const [isPending, startTransition] = useTransition();
+	const [error, setError] = useState("");
 	const { tasks, setTasks } = useTasksContext();
 	const router = useRouter();
 
@@ -40,7 +42,7 @@ export default function CreateTaskModal() {
 		reset,
 		control,
 		handleSubmit,
-		formState: { errors, isSubmitting },
+		formState: { errors },
 	} = useForm({
 		resolver: zodResolver(taskSchema),
 		defaultValues: {
@@ -57,26 +59,34 @@ export default function CreateTaskModal() {
 	const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId;
 	if (!userId) return null;
 
-	const handleCreateTask = async (data: TaskType) => {
-		startTransition(() => {
+	const handleCreateTask = (data: TaskType) => {
+		setError("");
+		startTransition(async () => {
 			const tempTask = { ...data, taskId: `temp-${Date.now()}` };
 			setTasks([...tasks, tempTask]);
-		});
-		try {
-			const resData = await createTaskAction(data, userId);
-			if (resData.status === "expired" || resData.status === "unauthorized") {
-				router.replace("/sign-in");
-				router.refresh();
+			try {
+				const resData = await createTaskAction(data, userId);
+				if (
+					resData.status === "redirect" ||
+					resData.status === "expired" ||
+					resData.status === "unauthorized"
+				) {
+					router.replace("/sign-in");
+					closeButtonRef.current?.click();
+					reset();
+				}
+				if (resData.status === "failed") {
+					setError(resData.error);
+					return;
+				}
 				closeButtonRef.current?.click();
 				reset();
+			} catch (error) {
+				startTransition(() => setTasks(tasks || []));
+				setError(error instanceof Error ? error.message : "Server error");
+				console.error(error);
 			}
-
-			closeButtonRef.current?.click();
-			reset();
-		} catch (error) {
-			startTransition(() => setTasks(tasks || []));
-			console.error(error);
-		}
+		});
 	};
 	return (
 		<DialogContent
@@ -266,11 +276,17 @@ export default function CreateTaskModal() {
 						</p>
 					)}
 				</div>
+				{error && (
+					<p className="text-red-500 text-[14px] border border-red-300 bg-red-50 p-2 rounded">
+						{error}
+					</p>
+				)}
+
 				<DialogFooter className="mt-4">
 					<DialogClose asChild>
 						<Button variant="outline">Cancel</Button>
 					</DialogClose>
-					<Button disabled={isSubmitting}>{isSubmitting ? "Creating..." : "Create"}</Button>
+					<Button disabled={isPending}>{isPending ? "Creating..." : "Create"}</Button>
 				</DialogFooter>
 			</form>
 		</DialogContent>

@@ -2,18 +2,18 @@
 
 import { TaskType } from "@/lib/schemas/task-schema";
 import { CreateTaskReturnType } from "@/tasks/types/create-task-response-type";
-import { revalidatePath, updateTag } from "next/cache";
+import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function createTaskAction(data: TaskType, userId: string): CreateTaskReturnType {
-	if (!userId) return redirect("/sign-in");
+	if (!userId) redirect("/sign-in");
 
 	const cookieStore = await cookies();
 	const cookieName = `token_tasks_${userId}`;
 
 	const cookie = cookieStore.get(cookieName);
-	if (!cookie) return redirect("/sign-in");
+	if (!cookie) return { status: "redirect" };
 
 	const res = await fetch("http://localhost:3222/tasks", {
 		method: "POST",

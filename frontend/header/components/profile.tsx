@@ -25,7 +25,7 @@ export default function Profile() {
 							.join("")}
 					</button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="rounded-2xl">
+				<DropdownMenuContent align="end" className="rounded-[12px]">
 					<DropdownMenuItem className="flex flex-col items-start gap-1">
 						<p className="text-sm font-medium">{user?.name}</p>
 						<p className="text-xs text-muted-foreground">{user?.email}</p>

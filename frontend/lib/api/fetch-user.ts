@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const fetchUser = async (id?: string) => {
-	if (!id) return redirect("/sign-in");
+	if (!id) redirect("/sign-in");
 
 	const cookieStore = await cookies();
 	const cookieName = `token_tasks_${id}`;
@@ -15,7 +15,7 @@ export const fetchUser = async (id?: string) => {
 
 async function cachedUser(cookieName: string, cookie: { value: string }) {
 	"use cache";
-	cacheLife("hours");
+	cacheLife("minutes");
 	const res = await fetch("http://localhost:3222/user", {
 		method: "GET",
 		headers: { Cookie: `${cookieName}=${cookie.value}` },

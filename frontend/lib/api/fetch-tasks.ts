@@ -1,4 +1,4 @@
-import { cacheTag } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -9,7 +9,7 @@ export async function fetchTasks(id?: string) {
 	const cookieName = `token_tasks_${id}`;
 
 	const cookie = cookieStore.get(cookieName);
-	if (!cookie) return redirect("/sign-in");
+	if (!cookie) redirect("/sign-in");
 
 	return cachedFetchTasks(cookieName, cookie.value);
 }
@@ -17,6 +17,7 @@ export async function fetchTasks(id?: string) {
 async function cachedFetchTasks(cookieName: string, cookieValue: string) {
 	"use cache";
 	cacheTag("tasks");
+	cacheLife("minutes");
 	const res = await fetch("http://localhost:3222/tasks", {
 		method: "GET",
 		headers: { Cookie: `${cookieName}=${cookieValue}` },
