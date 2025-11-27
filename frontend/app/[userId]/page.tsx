@@ -6,7 +6,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus } from "lucide-react";
 import CreateTaskModal from "@/tasks/components/create-task-modal";
 import RootLayout from "@/components/auth/auth-layout";
-import { Suspense } from "react";
 
 export default async function Home({ params }: { params: { userId: string } }) {
 	return (

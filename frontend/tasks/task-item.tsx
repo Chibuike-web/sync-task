@@ -24,9 +24,9 @@ import { useTasksContext } from "./contexts/tasks-context";
 import { Fragment, startTransition, useState } from "react";
 import { deleteTaskAction } from "@/actions/delete-task-action";
 import { useParams, useRouter } from "next/navigation";
-import { editTaskAction } from "@/actions/edit-task-action";
 import EditTaskModal from "./components/edit-task-modal";
 import { completeTaskAction } from "@/actions/complete-task-action";
+import { Dialog } from "@/components/ui/dialog";
 
 function getStatusColor(status: string) {
 	return cn({
@@ -135,7 +135,13 @@ export default function TaskItem({ tasks }: { tasks: TaskType[] }) {
 									>
 										Mark as Completed
 									</DropdownMenuItem>
-									<DropdownMenuItem className="px-4 py-2" onClick={() => setSelectedTask(task)}>
+									<DropdownMenuItem
+										className={cn(
+											"px-4 py-2",
+											task.taskStatus === "completed" && "opacity-50 pointer-events-none"
+										)}
+										onClick={() => setSelectedTask(task)}
+									>
 										Edit Task
 									</DropdownMenuItem>
 									<AlertDialog>
@@ -179,13 +185,15 @@ export default function TaskItem({ tasks }: { tasks: TaskType[] }) {
 						</div>
 						<p className="mt-2">{task.taskDescription}</p>
 					</div>
-					{selectedTask && (
-						<EditTaskModal
-							task={selectedTask}
-							userId={userId}
-							close={() => setSelectedTask(null)}
-						/>
-					)}
+					<Dialog open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
+						{selectedTask && (
+							<EditTaskModal
+								task={selectedTask}
+								userId={userId}
+								close={() => setSelectedTask(null)}
+							/>
+						)}
+					</Dialog>
 				</Fragment>
 			))}
 		</div>

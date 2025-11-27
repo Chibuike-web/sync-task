@@ -82,9 +82,7 @@ export default function CreateTaskModal() {
 				closeButtonRef.current?.click();
 				reset();
 			} catch (error) {
-				startTransition(() => setTasks(tasks || []));
 				setError(error instanceof Error ? error.message : "Server error");
-				console.error(error);
 			}
 		});
 	};
@@ -103,6 +101,7 @@ export default function CreateTaskModal() {
 					<span className="sr-only">Close</span>
 				</DialogClose>
 			</DialogHeader>
+
 			<form className="flex flex-col gap-4" onSubmit={handleSubmit(handleCreateTask)}>
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="taskName" className="text-sm font-medium">
@@ -140,6 +139,7 @@ export default function CreateTaskModal() {
 						</p>
 					)}
 				</div>
+
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="taskStatus" className="text-sm font-medium">
 						Status
@@ -170,6 +170,7 @@ export default function CreateTaskModal() {
 						</p>
 					)}
 				</div>
+
 				<div className="grid sm:grid-cols-2 gap-4">
 					<div className="flex flex-col gap-2">
 						<Label htmlFor="startDate" className="text-sm font-medium">
@@ -246,6 +247,7 @@ export default function CreateTaskModal() {
 						)}
 					</div>
 				</div>
+
 				<div className="flex flex-col gap-2">
 					<Label htmlFor="taskPriority" className="text-sm font-medium">
 						Priority
@@ -284,7 +286,9 @@ export default function CreateTaskModal() {
 
 				<DialogFooter className="mt-4">
 					<DialogClose asChild>
-						<Button variant="outline">Cancel</Button>
+						<Button type="button" variant="outline">
+							Cancel
+						</Button>
 					</DialogClose>
 					<Button disabled={isPending}>{isPending ? "Creating..." : "Create"}</Button>
 				</DialogFooter>
