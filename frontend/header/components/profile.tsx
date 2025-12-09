@@ -8,11 +8,13 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUserContext } from "@/tasks/contexts/user-context";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
 export default function Profile() {
 	const user = useUserContext();
 	const [pending, startTransition] = useTransition();
+	const router = useRouter();
 
 	return (
 		<>
@@ -45,10 +47,10 @@ export default function Profile() {
 										headers: { "Content-Type": "application/json" },
 										body: JSON.stringify({ id: user.id }),
 									});
+									window.location.href = "/sign-in";
 								} catch (error) {
 									console.error(error);
 								}
-								window.location.href = "/sign-in";
 							});
 						}}
 					>

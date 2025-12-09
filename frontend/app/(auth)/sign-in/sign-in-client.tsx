@@ -37,6 +37,7 @@ export default function SignInClient() {
 				setSignInError(resData.error);
 				return;
 			}
+			router.refresh();
 			router.push(`/${resData.id}`);
 			reset();
 		} catch (err) {
